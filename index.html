@@ -26,7 +26,9 @@ const ADMIN_EMAIL = "joffreadumf@gmail.com"; // ← Tu correo de administrador
 <style>
 :root{--bg:#0f0e0b;--surface:#1a1815;--surface2:#242220;--surface3:#2e2c29;--border:#3a3835;--accent:#d4a84b;--accent2:#b87333;--accent-light:#f0c97a;--text:#f0ece4;--text-muted:#9a9590;--text-dim:#5a5752;--green:#6ab187;--red:#c0534a;--blue:#5b8fc7;--radius:8px;--radius-lg:16px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+#app{flex-direction:column;height:100%;}
 
 /* ── LOADING ── */
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px;transition:opacity .5s;}
@@ -71,7 +73,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── HEADER ── */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;flex-shrink:0;z-index:100;}
 .logo{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;color:var(--accent);letter-spacing:2px;cursor:pointer;white-space:nowrap;}
 .logo span{color:var(--text-muted);font-weight:400;font-size:12px;margin-left:8px;font-family:'DM Sans',sans-serif;}
 .header-center{display:flex;align-items:center;gap:3px;}
@@ -102,7 +104,7 @@ nav button.active{color:var(--accent);background:var(--surface2);border:1px soli
 .admin-badge{background:rgba(212,168,75,.15);color:var(--accent);border:1px solid rgba(212,168,75,.25);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:99px;text-transform:uppercase;vertical-align:middle;}
 
 /* ── LAYOUT ── */
-main{display:flex;height:calc(100vh - 60px);overflow:hidden;}
+main{display:flex;flex:1;overflow:hidden;}
 .sidebar{width:210px;min-width:210px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
 .sb-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;padding:8px 16px 4px;}
 .sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;color:var(--text-muted);font-size:12px;}
@@ -812,7 +814,7 @@ function showScreen(id) {
   document.getElementById('app').style.display = 'none';
   const el = document.getElementById(id);
   if (el) { el.style.display='flex'; setTimeout(()=>el.classList.add('show'),10); }
-  else if (id==='app') { document.getElementById('app').style.display='block'; }
+  else if (id==='app') { document.getElementById('app').style.display='flex'; }
 }
 
 window.signInWithGoogle = async () => {

@@ -345,6 +345,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="email-badge" id="pen-email"></div>
     <div class="card-sub">Tu solicitud fue enviada. Recibirás acceso cuando sea aprobada.</div>
     <button class="card-btn cb-secondary" onclick="location.reload()">↺ Verificar estado</button>
+    <button class="card-btn cb-secondary" onclick="switchAccount()" style="margin-top:-8px;">↩ Intentar con otra cuenta</button>
     <div class="card-foot">Recarga la página si ya fuiste aprobado</div>
   </div>
 </div>
@@ -930,6 +931,12 @@ window.signInWithGoogle = async () => {
 
 window.signOut = async () => {
   if (!confirm('¿Cerrar sesión?')) return;
+  RT_LISTENERS.forEach(l => off(l.ref)); RT_LISTENERS = [];
+  await fbSignOut(auth);
+  showScreen('screen-signin');
+};
+
+window.switchAccount = async () => {
   RT_LISTENERS.forEach(l => off(l.ref)); RT_LISTENERS = [];
   await fbSignOut(auth);
   showScreen('screen-signin');

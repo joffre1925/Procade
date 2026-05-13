@@ -942,12 +942,21 @@ window.switchAccount = async () => {
   showScreen('screen-signin');
 };
 
-// Handle redirect result first (runs once after Google redirect)
-getRedirectResult(auth).catch(e => {
-  if (e?.code !== 'auth/null-credential') toast('Error al iniciar sesión: ' + e.message, true);
+// ── Call getRedirectResult ONCE before setting up the listener.
+//    Wrap in a promise so onAuthStateChanged can await it and
+//    avoid acting on an incomplete auth state during the redirect.
+const redirectDone = getRedirectResult(auth).then(() => true).catch(e => {
+  if (e?.code && e.code !== 'auth/null-credential' && e.code !== 'auth/no-auth-event') {
+    toast('Error al iniciar sesión: ' + e.message, true);
+  }
+  return true; // always resolve — errors are non-fatal here
 });
 
 onAuthStateChanged(auth, async user => {
+  // Wait for redirect processing to finish before evaluating auth state.
+  // This prevents acting on a transient user=null during the redirect flow.
+  await redirectDone;
+
   const ls = document.getElementById('loading-screen');
   if (!user) {
     ls.classList.add('out'); setTimeout(()=>ls.style.display='none',500);

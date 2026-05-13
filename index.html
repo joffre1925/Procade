@@ -3,12 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PROCADE · Sistema de Costeo</title>
+<title>PROCADE · ERP Alimentos</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- ═══════════════════════════════════════════════════════════
-     🔥 CONFIGURACIÓN FIREBASE — CAMBIA ESTOS VALORES
-     ════════════════════════════════════════════════════════ -->
 <script>
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyCwkMhFD4fsvxyU3VgYDqRUegdr72RtZ44",
@@ -19,9 +16,8 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "922536272827",
   appId:             "1:922536272827:web:e6dd8802df69f9ebf6da9e"
 };
-const ADMIN_EMAIL = "joffreadumf@gmail.com"; // ← Tu correo de administrador
+const ADMIN_EMAIL = "joffreadumf@gmail.com";
 </script>
-<!-- ════════════════════════════════════════════════════════ -->
 
 <style>
 :root{--bg:#0f0e0b;--surface:#1a1815;--surface2:#242220;--surface3:#2e2c29;--border:#3a3835;--accent:#d4a84b;--accent2:#b87333;--accent-light:#f0c97a;--text:#f0ece4;--text-muted:#9a9590;--text-dim:#5a5752;--green:#6ab187;--red:#c0534a;--blue:#5b8fc7;--radius:8px;--radius-lg:16px;}
@@ -68,7 +64,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .login-time{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:5px;}
 .login-time::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;}
 
-/* ── REALTIME DOT ── */
+/* ── REALTIME ── */
 #rt-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
@@ -93,19 +89,35 @@ nav button.active{color:var(--accent);background:var(--surface2);border:1px soli
 .pill-av{width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0f0e0b;overflow:hidden;flex-shrink:0;}
 .pill-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .pill-name{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.user-dd{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:250px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;z-index:300;}
+.user-dd{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:260px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;z-index:300;}
 .user-dd.open{display:block;}
 .dd-head{padding:14px 16px;border-bottom:1px solid var(--border);}
 .dd-name{font-family:'Playfair Display',serif;font-size:15px;}
 .dd-email{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:2px;}
+.dd-role{margin-top:5px;}
 .dd-item{padding:10px 16px;display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12px;color:var(--text-muted);transition:background .15s;}
 .dd-item:hover{background:var(--surface2);color:var(--text);}
 .dd-item.danger{color:var(--red);}
-.admin-badge{background:rgba(212,168,75,.15);color:var(--accent);border:1px solid rgba(212,168,75,.25);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:99px;text-transform:uppercase;vertical-align:middle;}
+
+/* ── ROLE BADGES ── */
+.role-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:99px;text-transform:uppercase;vertical-align:middle;}
+.rb-admin{background:rgba(212,168,75,.15);color:var(--accent);border:1px solid rgba(212,168,75,.25);}
+.rb-produccion{background:rgba(91,143,199,.15);color:var(--blue);border:1px solid rgba(91,143,199,.25);}
+.rb-compras{background:rgba(106,177,135,.15);color:var(--green);border:1px solid rgba(106,177,135,.25);}
+.rb-ventas{background:rgba(192,83,74,.12);color:#e07a72;border:1px solid rgba(192,83,74,.25);}
+.rb-consulta{background:rgba(90,87,82,.2);color:var(--text-muted);border:1px solid var(--border);}
+
+/* ── ESTADO BADGES ── */
+.est-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:10px;font-family:'DM Mono',monospace;}
+.est-pendiente{background:rgba(212,168,75,.12);color:var(--accent);}
+.est-proceso{background:rgba(91,143,199,.15);color:var(--blue);}
+.est-completado{background:rgba(106,177,135,.12);color:var(--green);}
+.est-cancelado{background:rgba(192,83,74,.12);color:var(--red);}
+.est-entregado{background:rgba(106,177,135,.12);color:var(--green);}
 
 /* ── LAYOUT ── */
 main{display:flex;flex:1;overflow:hidden;}
-.sidebar{width:210px;min-width:210px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.sidebar{width:200px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;flex-shrink:0;}
 .sb-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;padding:8px 16px 4px;}
 .sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;color:var(--text-muted);font-size:12px;}
 .sb-item:hover{background:var(--surface2);color:var(--text);}
@@ -148,7 +160,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .editable{background:transparent;border:none;color:inherit;font:inherit;width:100%;padding:0;outline:none;cursor:text;}
 .editable:focus{background:var(--surface3);border-radius:4px;padding:2px 5px;outline:1px solid var(--accent);}
 
-/* ── RECIPE DETAIL ── */
+/* ── RECIPE / FORMULACION ── */
 .rf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
 .rf-field{display:flex;flex-direction:column;gap:5px;}
 .rf-field label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;}
@@ -158,6 +170,22 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .cb-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;}
 .cb-val{font-family:'Playfair Display',serif;font-size:21px;}
 .cb-val.accent{color:var(--accent);}.cb-val.green{color:var(--green);}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px;}
+.recipe-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.recipe-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.recipe-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
+.recipe-card:hover::before{transform:scaleX(1);}
+.rc-name{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px;}
+.rc-meta{color:var(--text-muted);font-size:11px;margin-bottom:13px;}
+.rc-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.rc-stat .lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;}
+.rc-stat .val{font-family:'DM Mono',monospace;font-size:13px;margin-top:2px;}
+.rc-stat .val.accent{color:var(--accent);}
+.price-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);}
+.price-row:last-child{border-bottom:none;}
+.mg-bar{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-top:4px;}
+.mg-fill{height:100%;border-radius:99px;transition:width .5s;}
+.price-lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
 
 /* ── BUTTONS ── */
 .btn{padding:7px 16px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px;}
@@ -180,31 +208,6 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .tag-add{background:rgba(180,120,200,.12);color:#b888d4;}
 .tag-other{background:rgba(90,87,82,.2);color:var(--text-muted);}
 
-/* ── RECIPE GRID ── */
-.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px;}
-.recipe-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-.recipe-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
-.recipe-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
-.recipe-card:hover::before{transform:scaleX(1);}
-.rc-name{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px;}
-.rc-meta{color:var(--text-muted);font-size:11px;margin-bottom:13px;}
-.rc-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.rc-stat .lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;}
-.rc-stat .val{font-family:'DM Mono',monospace;font-size:13px;margin-top:2px;}
-.rc-stat .val.accent{color:var(--accent);}
-
-/* ── PRICING ── */
-.price-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);}
-.price-row:last-child{border-bottom:none;}
-.mg-bar{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-top:4px;}
-.mg-fill{height:100%;border-radius:99px;transition:width .5s;}
-.price-lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
-
-/* ── INVENTORY ── */
-.inv-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:10px;font-family:'DM Mono',monospace;}
-.inv-ok{background:rgba(106,177,135,.12);color:var(--green);}
-.inv-zero{background:rgba(90,87,82,.2);color:var(--text-dim);}
-
 /* ── ADMIN ── */
 .user-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);}
 .user-row:last-child{border-bottom:none;}
@@ -215,7 +218,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:500px;max-width:95vw;max-height:85vh;overflow-y:auto;padding:24px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;padding:24px;}
 .modal-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:16px;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
 .ff{display:flex;flex-direction:column;gap:5px;}
@@ -233,7 +236,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .search-bar{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;width:190px;transition:all .2s;}
 .search-bar:focus{border-color:var(--accent);width:240px;}
 
-/* ── ING DROPDOWN ── */
+/* ── INGREDIENT DROPDOWN ── */
 .ing-wrap{position:relative;}
 .ing-dd{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-height:180px;overflow-y:auto;z-index:100;margin-top:2px;box-shadow:0 8px 24px rgba(0,0,0,.4);}
 .ing-dd.open{display:block;}
@@ -246,7 +249,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .back-btn{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;cursor:pointer;margin-bottom:16px;text-transform:uppercase;transition:color .15s;}
 .back-btn:hover{color:var(--accent);}
 
-/* ── SETTINGS ── */
+/* ── SETTINGS / STABS ── */
 .stabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;}
 .stab{background:none;border:none;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:8px 14px;cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
 .stab.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -264,6 +267,11 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 .notice{background:rgba(212,168,75,.07);border:1px solid rgba(212,168,75,.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text-muted);margin-bottom:16px;}
 .notice strong{color:var(--accent);}
 
+/* ── INV BADGES ── */
+.inv-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:10px;font-family:'DM Mono',monospace;}
+.inv-ok{background:rgba(106,177,135,.12);color:var(--green);}
+.inv-zero{background:rgba(90,87,82,.2);color:var(--text-dim);}
+
 /* ── TOAST ── */
 #toast{position:fixed;bottom:18px;right:18px;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:9px 16px;border-radius:var(--radius);font-size:12px;opacity:0;transform:translateY(7px);transition:all .3s;z-index:9999;pointer-events:none;max-width:300px;}
 #toast.show{opacity:1;transform:translateY(0);}
@@ -273,7 +281,6 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 </style>
 </head>
 <body>
-
 <!-- ── LOADING ── -->
 <div id="loading-screen">
   <div class="loading-logo">PROCADE</div>
@@ -281,28 +288,13 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   <div class="loading-bar"><div class="loading-fill"></div></div>
 </div>
 
-<!-- ── WELCOME / LOGIN SCREEN ── -->
-<div class="screen" id="screen-welcome">
-  <div class="screen-bg"></div>
-  <div class="card">
-    <div class="card-logo">PROCADE</div>
-    <div style="width:36px;height:1px;background:var(--border)"></div>
-    <div class="login-avatar" id="wel-avatar"><span id="wel-initials">?</span></div>
-    <div class="login-name" id="wel-name">Cargando…</div>
-    <div class="email-badge" id="wel-email"></div>
-    <div class="login-time" id="wel-time"></div>
-    <button class="card-btn cb-primary" onclick="enterDashboard()">→ Entrar al Dashboard</button>
-    <div class="card-foot">Acceso verificado con Google · Datos en tiempo real</div>
-  </div>
-</div>
-
-<!-- ── GOOGLE SIGN IN SCREEN ── -->
+<!-- ── SIGN IN ── -->
 <div class="screen" id="screen-signin">
   <div class="screen-bg"></div>
   <div class="card">
     <div class="card-logo">PROCADE</div>
     <div class="card-icon">🔐</div>
-    <div class="card-title">Sistema de Costeo</div>
+    <div class="card-title">ERP Alimentos</div>
     <div class="card-sub">Inicia sesión con tu cuenta de Google para continuar.</div>
     <button class="card-btn cb-google" onclick="signInWithGoogle()">
       <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -312,7 +304,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   </div>
 </div>
 
-<!-- ── REQUEST ACCESS SCREEN ── -->
+<!-- ── REQUEST ACCESS ── -->
 <div class="screen" id="screen-request">
   <div class="screen-bg"></div>
   <div class="card">
@@ -320,17 +312,17 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="card-icon">📋</div>
     <div class="card-title">Solicitar Acceso</div>
     <div class="email-badge" id="req-email"></div>
-    <div class="card-sub">Tu cuenta aún no tiene acceso. Envía una solicitud y el administrador recibirá una notificación.</div>
+    <div class="card-sub">Tu cuenta aún no tiene acceso. Envía una solicitud al administrador.</div>
     <div class="card-form">
       <div><label>Tu nombre completo</label><input id="req-name" placeholder="ej. María García" style="margin-top:5px;"></div>
       <div><label>Mensaje (opcional)</label><textarea id="req-msg" rows="2" placeholder="ej. Soy del equipo de producción…" style="margin-top:5px;"></textarea></div>
       <button class="card-btn cb-primary" id="req-btn" onclick="submitRequest()">📨 Enviar Solicitud</button>
     </div>
-    <div class="card-foot">El administrador recibirá una notificación inmediata</div>
+    <div class="card-foot">El administrador recibirá notificación inmediata</div>
   </div>
 </div>
 
-<!-- ── PENDING SCREEN ── -->
+<!-- ── PENDING ── -->
 <div class="screen" id="screen-pending">
   <div class="screen-bg"></div>
   <div class="card">
@@ -339,13 +331,13 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="card-title">Solicitud en Revisión</div>
     <div class="status-pill sp-pending">● En espera de aprobación</div>
     <div class="email-badge" id="pen-email"></div>
-    <div class="card-sub">Tu solicitud fue enviada. El administrador la revisará y recibirás una notificación cuando sea aprobada.</div>
+    <div class="card-sub">Tu solicitud fue enviada. Recibirás acceso cuando sea aprobada.</div>
     <button class="card-btn cb-secondary" onclick="location.reload()">↺ Verificar estado</button>
-    <div class="card-foot">Si ya fuiste aprobado, recarga la página para entrar</div>
+    <div class="card-foot">Recarga la página si ya fuiste aprobado</div>
   </div>
 </div>
 
-<!-- ── REJECTED SCREEN ── -->
+<!-- ── REJECTED ── -->
 <div class="screen" id="screen-rejected">
   <div class="screen-bg"></div>
   <div class="card">
@@ -353,26 +345,29 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="card-icon">❌</div>
     <div class="card-title">Acceso No Aprobado</div>
     <div class="status-pill sp-rejected">● Solicitud rechazada</div>
-    <div class="card-sub">Tu solicitud fue rechazada. Si crees que es un error, puedes volver a solicitarlo.</div>
+    <div class="card-sub">Tu solicitud fue rechazada. Si crees que es un error, contáctate con el administrador.</div>
     <button class="card-btn cb-primary" onclick="showScreen('screen-request')">↩ Volver a solicitar</button>
   </div>
 </div>
 
-<!-- ── MAIN APP ── -->
+<!-- ══════════════════════════════════════════════════════
+     MAIN APP
+     ══════════════════════════════════════════════════ -->
 <div id="app" style="display:none;">
 
 <header>
   <div class="logo" onclick="switchTab('dashboard')">
-    <span id="hdr-brand">PROCADE</span><span id="hdr-sub"> · Sistema de Costeo</span>
+    <span id="hdr-brand">PROCADE</span><span id="hdr-sub"> · ERP Alimentos</span>
   </div>
   <nav class="header-center" id="main-nav">
-    <button class="active" id="nav-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
-    <button id="nav-recipes" onclick="switchTab('recipes')">Recetas</button>
-    <button id="nav-ingredients" onclick="switchTab('ingredients')">Insumos</button>
-    <button id="nav-pricing" onclick="switchTab('pricing')">Precios</button>
-    <button id="nav-inventory" onclick="switchTab('inventory')">📦 Inventario</button>
-    <button id="nav-settings" onclick="switchTab('settings')">⚙ Config</button>
-    <button id="nav-admin" onclick="switchTab('admin')" style="display:none">👥 Admin</button>
+    <button id="nav-dashboard"   onclick="switchTab('dashboard')">Dashboard</button>
+    <button id="nav-formulacion" onclick="switchTab('formulacion')">Formulación</button>
+    <button id="nav-insumos"     onclick="switchTab('insumos')">Insumos</button>
+    <button id="nav-produccion"  onclick="switchTab('produccion')">Producción</button>
+    <button id="nav-compras"     onclick="switchTab('compras')">Compras</button>
+    <button id="nav-ventas"      onclick="switchTab('ventas')">Ventas</button>
+    <button id="nav-inventario"  onclick="switchTab('inventario')">Inventario</button>
+    <button id="nav-admin"       onclick="switchTab('admin')" style="display:none">👥 Admin</button>
   </nav>
   <div class="header-right">
     <div class="rt-badge"><span id="rt-dot"></span> Tiempo real</div>
@@ -384,9 +379,9 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <div class="dd-head">
           <div class="dd-name" id="dd-name">—</div>
           <div class="dd-email" id="dd-email">—</div>
+          <div class="dd-role" id="dd-role"></div>
         </div>
-        <div class="dd-item" onclick="switchTab('settings');closeDD()">⚙ Configuración</div>
-        <div class="dd-item" onclick="switchTab('admin');closeDD()" id="dd-admin-item" style="display:none">👥 Gestión de Usuarios</div>
+        <div class="dd-item" onclick="switchTab('admin');closeDD()" id="dd-admin-item" style="display:none">👥 Administrador</div>
         <div class="dd-item danger" onclick="signOut()">↩ Cerrar Sesión</div>
       </div>
     </div>
@@ -395,64 +390,76 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 
 <main>
   <aside class="sidebar">
-    <div>
-      <div class="sb-label">Recetas</div>
-      <div id="recipe-list-sidebar"></div>
-      <button class="add-btn" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>
-    </div>
-    <div style="margin-top:12px;">
-      <div class="sb-label">Filtrar</div>
-      <div class="sb-item" onclick="switchTab('recipes')">📋 Todas <span class="badge" id="badge-all">0</span></div>
-      <div class="sb-item" onclick="switchTab('recipes')">🫙 Salsas <span class="badge" id="badge-salsas">0</span></div>
-      <div class="sb-item" onclick="switchTab('recipes')">🥩 Proteínas <span class="badge" id="badge-proteinas">0</span></div>
-    </div>
-    <div style="margin-top:12px;">
-      <div class="sb-label">Datos</div>
-      <div class="sb-item" onclick="switchTab('inventory')">📦 Inventario <span class="badge" id="badge-inv">0</span></div>
-      <div class="sb-item" onclick="switchTab('ingredients')">🧪 Insumos <span class="badge" id="badge-ings">0</span></div>
-    </div>
+    <div id="sidebar-content"></div>
   </aside>
 
   <div class="content">
-
-    <!-- DASHBOARD -->
+    <!-- ── DASHBOARD ── -->
     <div class="page active" id="page-dashboard">
       <div class="ph">
-        <div><div class="pt">Dashboard</div><div class="ps">Datos en tiempo real — actualizados automáticamente para todos los usuarios</div></div>
+        <div><div class="pt">Dashboard</div><div class="ps">Resumen general en tiempo real</div></div>
       </div>
       <div class="stats-row">
-        <div class="stat-card"><div class="sc-label">Recetas</div><div class="sc-val accent" id="st-recipes">0</div><div class="sc-sub">activas</div></div>
-        <div class="stat-card"><div class="sc-label">Insumos</div><div class="sc-val" id="st-ings">0</div><div class="sc-sub">registrados</div></div>
-        <div class="stat-card"><div class="sc-label">Inversión en Recetas</div><div class="sc-val green" id="st-inv">—</div><div class="sc-sub">costo total producción</div></div>
-        <div class="stat-card"><div class="sc-label">Gasto en Stock</div><div class="sc-val accent" id="st-stock">—</div><div class="sc-sub">total compras registradas</div></div>
+        <div class="stat-card"><div class="sc-label">Recetas</div><div class="sc-val accent" id="st-recetas">0</div><div class="sc-sub">fórmulas activas</div></div>
+        <div class="stat-card"><div class="sc-label">Insumos</div><div class="sc-val" id="st-insumos">0</div><div class="sc-sub">materias primas</div></div>
+        <div class="stat-card"><div class="sc-label">Producción (mes)</div><div class="sc-val green" id="st-prod">0</div><div class="sc-sub">órdenes este mes</div></div>
+        <div class="stat-card"><div class="sc-label">Ventas (mes)</div><div class="sc-val accent" id="st-ventas">—</div><div class="sc-sub">ingresos este mes</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Recetas · Costos</div></div>
+          <div style="padding:0"><table>
+            <thead><tr><th>Receta</th><th>Costo Unit.</th><th>Precio</th><th>Margen</th></tr></thead>
+            <tbody id="dash-recetas"></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Últimas Órdenes de Producción</div></div>
+          <div style="padding:0"><table>
+            <thead><tr><th>Receta</th><th>Lotes</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody id="dash-prod"></tbody>
+          </table></div>
+        </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Resumen de Recetas</div></div>
+        <div class="panel-hdr"><div class="panel-title">Últimas Ventas</div></div>
         <div style="padding:0"><table>
-          <thead><tr><th>Receta</th><th>Orden</th><th>Envase</th><th>Insumos</th><th>Costo Unit.</th><th>Inversión</th><th>Precio</th><th>Margen</th></tr></thead>
-          <tbody id="dash-table"></tbody>
+          <thead><tr><th>Fecha</th><th>Producto</th><th>Cant.</th><th>Total</th><th>Cliente</th><th>Estado</th></tr></thead>
+          <tbody id="dash-ventas"></tbody>
         </table></div>
       </div>
     </div>
 
-    <!-- RECIPES LIST -->
-    <div class="page" id="page-recipes">
+    <!-- ── FORMULACIÓN ── -->
+    <div class="page" id="page-formulacion">
       <div class="ph">
-        <div><div class="pt">Recetas</div><div class="ps">Gestión de fórmulas y producción</div></div>
+        <div><div class="pt">Formulación</div><div class="ps">Recetas, fórmulas y estructura de precios</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <input class="search-bar" id="recipe-search" placeholder="Buscar…" oninput="renderRecipeGrid()">
-          <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>
+          <button class="btn btn-primary btn-sm" id="btn-new-recipe" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>
         </div>
       </div>
-      <div class="recipe-grid" id="recipe-grid"></div>
+      <div class="stabs">
+        <button class="stab active" onclick="stab('form-recetas',this)">🍳 Recetas</button>
+        <button class="stab" onclick="stab('form-precios',this)">💰 Precios</button>
+      </div>
+      <div class="stab-content active" id="stab-form-recetas">
+        <div class="recipe-grid" id="recipe-grid"></div>
+      </div>
+      <div class="stab-content" id="stab-form-precios">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Estructura de Precios &amp; Márgenes</div></div>
+          <div style="padding:16px"><div id="pricing-rows"></div></div>
+        </div>
+      </div>
     </div>
 
-    <!-- RECIPE DETAIL -->
+    <!-- ── DETALLE RECETA ── -->
     <div class="page" id="page-recipe-detail">
-      <div class="back-btn" onclick="switchTab('recipes')">← Volver a Recetas</div>
+      <div class="back-btn" onclick="switchTab('formulacion')">← Volver a Formulación</div>
       <div class="ph">
         <div><div class="pt" id="det-name">Receta</div><div class="ps" id="det-sub"></div></div>
-        <button class="btn btn-danger btn-sm" onclick="deleteCurrentRecipe()">🗑 Eliminar</button>
+        <button class="btn btn-danger btn-sm" id="btn-delete-recipe" onclick="deleteCurrentRecipe()">🗑 Eliminar</button>
       </div>
       <div class="rf-grid" id="det-fields"></div>
       <div class="cost-box">
@@ -463,13 +470,13 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
       <div class="panel">
         <div class="panel-hdr">
           <div class="panel-title">Ingredientes / Fórmula</div>
-          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-ing')">＋ Agregar Insumo</button>
+          <button class="btn btn-ghost btn-sm" id="btn-add-ing" onclick="openModal('modal-add-ing')">＋ Agregar Insumo</button>
         </div>
         <div style="padding:0"><table>
-          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant. Unit.(g)</th><th>Costo Unit.</th><th>Total Orden</th><th></th></tr></thead>
+          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant.(g)</th><th>Costo Unit.</th><th>Total Orden</th><th></th></tr></thead>
           <tbody id="det-ings"></tbody>
           <tfoot><tr>
-            <td colspan="5" style="text-align:right;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-dim);padding:10px 11px;text-transform:uppercase;">Total</td>
+            <td colspan="5" style="text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);padding:10px 11px;text-transform:uppercase;">Total</td>
             <td class="accent mono" id="det-tot-u" style="padding:10px 11px;"></td>
             <td class="accent mono" id="det-tot-p" style="padding:10px 11px;"></td>
             <td></td>
@@ -478,87 +485,118 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
       </div>
     </div>
 
-    <!-- INGREDIENTS -->
-    <div class="page" id="page-ingredients">
+    <!-- ── INSUMOS ── -->
+    <div class="page" id="page-insumos">
       <div class="ph">
         <div><div class="pt">Insumos</div><div class="ps">Base de datos de materias primas</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input class="search-bar" id="ing-search" placeholder="Buscar…" oninput="renderIngsTable()">
-          <button class="btn btn-primary btn-sm" onclick="openModal('modal-new-ing')">＋ Nuevo Insumo</button>
+          <input class="search-bar" id="ing-search" placeholder="Buscar…" oninput="renderInsumosTable()">
+          <button class="btn btn-primary btn-sm" id="btn-new-insumo" onclick="openModal('modal-new-ing')">＋ Nuevo Insumo</button>
         </div>
       </div>
       <div class="panel"><div style="padding:0"><table>
         <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Proveedor</th><th>Empaque</th><th>Costo Master</th><th>UM</th><th>Costo/g</th><th>Stock</th><th></th></tr></thead>
-        <tbody id="ings-table"></tbody>
+        <tbody id="insumos-table"></tbody>
       </table></div></div>
     </div>
 
-    <!-- PRICING -->
-    <div class="page" id="page-pricing">
+    <!-- ── PRODUCCIÓN ── -->
+    <div class="page" id="page-produccion">
       <div class="ph">
-        <div><div class="pt">Precios &amp; Márgenes</div><div class="ps">Edita el precio → se guarda automáticamente para todos</div></div>
+        <div><div class="pt">Producción</div><div class="ps">Órdenes de producción</div></div>
+        <button class="btn btn-primary btn-sm" id="btn-new-prod" onclick="openModal('modal-new-prod')">＋ Nueva Orden</button>
       </div>
-      <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Estructura de Precios</div></div>
-        <div style="padding:16px"><div id="pricing-rows"></div></div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card"><div class="sc-label">Total Órdenes</div><div class="sc-val accent" id="prod-st-total">0</div><div class="sc-sub">registradas</div></div>
+        <div class="stat-card"><div class="sc-label">En Proceso</div><div class="sc-val" id="prod-st-proceso">0</div><div class="sc-sub">activas</div></div>
+        <div class="stat-card"><div class="sc-label">Completadas</div><div class="sc-val green" id="prod-st-completadas">0</div><div class="sc-sub">finalizadas</div></div>
       </div>
+      <div class="panel"><div style="padding:0"><table>
+        <thead><tr><th>Fecha</th><th>Receta</th><th>Lotes</th><th>Operario</th><th>Estado</th><th>Notas</th><th></th></tr></thead>
+        <tbody id="prod-table"></tbody>
+      </table></div></div>
     </div>
 
-    <!-- INVENTORY -->
-    <div class="page" id="page-inventory">
+    <!-- ── COMPRAS ── -->
+    <div class="page" id="page-compras">
       <div class="ph">
-        <div><div class="pt">📦 Inventario</div><div class="ps">Registro de compras — stock acumulado en tiempo real</div></div>
+        <div><div class="pt">Compras</div><div class="ps">Registro de compras de insumos</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input class="search-bar" id="inv-search" placeholder="Buscar…" oninput="renderInventory()">
-          <button class="btn btn-primary btn-sm" onclick="openModal('modal-purchase')">＋ Registrar Compra</button>
+          <input class="search-bar" id="compras-search" placeholder="Buscar…" oninput="renderCompras()">
+          <button class="btn btn-primary btn-sm" id="btn-new-compra" onclick="openModal('modal-new-compra')">＋ Registrar Compra</button>
         </div>
       </div>
       <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
-        <div class="stat-card"><div class="sc-label">Movimientos</div><div class="sc-val accent" id="inv-st-mov">0</div><div class="sc-sub">compras registradas</div></div>
-        <div class="stat-card"><div class="sc-label">Gasto Total</div><div class="sc-val green" id="inv-st-total">—</div><div class="sc-sub">suma de compras</div></div>
-        <div class="stat-card"><div class="sc-label">Insumos en Stock</div><div class="sc-val" id="inv-st-items">0</div><div class="sc-sub">distintos</div></div>
+        <div class="stat-card"><div class="sc-label">Compras Totales</div><div class="sc-val accent" id="cmp-st-total">0</div><div class="sc-sub">registradas</div></div>
+        <div class="stat-card"><div class="sc-label">Gasto Total</div><div class="sc-val green" id="cmp-st-gasto">—</div><div class="sc-sub">suma de compras</div></div>
+        <div class="stat-card"><div class="sc-label">Insumos Distintos</div><div class="sc-val" id="cmp-st-items">0</div><div class="sc-sub">con stock</div></div>
       </div>
-      <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Stock Actual por Insumo</div></div>
-        <div style="padding:0"><table>
-          <thead><tr><th>Insumo</th><th>Categoría</th><th>Stock Total (g/un)</th><th>Última Compra</th><th>Último Precio</th><th>Último Costo/g</th><th>Compras</th></tr></thead>
-          <tbody id="inv-stock"></tbody>
-        </table></div>
+      <div class="panel"><div style="padding:0"><table>
+        <thead><tr><th>Fecha</th><th>Insumo</th><th>Proveedor</th><th>Cantidad</th><th>Precio Pagado</th><th>Costo/g</th><th>Notas</th><th></th></tr></thead>
+        <tbody id="compras-table"></tbody>
+      </table></div></div>
+    </div>
+
+    <!-- ── VENTAS ── -->
+    <div class="page" id="page-ventas">
+      <div class="ph">
+        <div><div class="pt">Ventas</div><div class="ps">Órdenes de venta</div></div>
+        <button class="btn btn-primary btn-sm" id="btn-new-venta" onclick="openModal('modal-new-venta')">＋ Nueva Venta</button>
       </div>
-      <div class="panel">
-        <div class="panel-hdr">
-          <div class="panel-title">Historial de Compras</div>
-          <select id="inv-filter" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 9px;font-size:11px;outline:none;" onchange="renderInventory()">
-            <option value="">Todos los insumos</option>
-          </select>
-        </div>
-        <div style="padding:0"><table>
-          <thead><tr><th>Fecha</th><th>Insumo</th><th>Proveedor</th><th>Cantidad</th><th>Precio Pagado</th><th>Costo/g</th><th>Notas</th><th></th></tr></thead>
-          <tbody id="inv-log"></tbody>
-        </table></div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card"><div class="sc-label">Ventas Totales</div><div class="sc-val accent" id="ven-st-total">0</div><div class="sc-sub">registradas</div></div>
+        <div class="stat-card"><div class="sc-label">Ingresos</div><div class="sc-val green" id="ven-st-ingresos">—</div><div class="sc-sub">total facturado</div></div>
+        <div class="stat-card"><div class="sc-label">Este Mes</div><div class="sc-val" id="ven-st-mes">0</div><div class="sc-sub">ventas del mes</div></div>
+      </div>
+      <div class="panel"><div style="padding:0"><table>
+        <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Total</th><th>Cliente</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="ventas-table"></tbody>
+      </table></div></div>
+    </div>
+
+    <!-- ── INVENTARIO ── -->
+    <div class="page" id="page-inventario">
+      <div class="ph">
+        <div><div class="pt">Inventario</div><div class="ps">Stock de insumos y productos terminados</div></div>
+      </div>
+      <div class="stabs">
+        <button class="stab active" onclick="stab('inv-insumos',this);renderInvInsumos()">🧪 Insumos</button>
+        <button class="stab" onclick="stab('inv-productos',this);renderInvProductos()">📦 Productos</button>
+      </div>
+      <div class="stab-content active" id="stab-inv-insumos">
+        <div class="panel"><div style="padding:0"><table>
+          <thead><tr><th>Insumo</th><th>Categoría</th><th>Stock (g/un)</th><th>Última Compra</th><th>Último Precio</th><th>Costo/g</th><th>Compras</th></tr></thead>
+          <tbody id="inv-ins-table"></tbody>
+        </table></div></div>
+      </div>
+      <div class="stab-content" id="stab-inv-productos">
+        <div class="panel"><div style="padding:0"><table>
+          <thead><tr><th>Producto</th><th>Stock (lotes)</th><th>Última Producción</th><th>Órdenes</th></tr></thead>
+          <tbody id="inv-prod-table"></tbody>
+        </table></div></div>
       </div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- ── CONFIGURACIÓN ── -->
     <div class="page" id="page-settings">
       <div class="ph">
-        <div><div class="pt">⚙ Configuración</div><div class="ps">Los cambios se sincronizan para todos los usuarios en tiempo real</div></div>
+        <div><div class="pt">⚙ Configuración</div><div class="ps">Cambios sincronizados para todos los usuarios</div></div>
         <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 Guardar</button>
       </div>
-      <div class="notice"><strong>🔥 Firebase:</strong> Cualquier cambio que guardes aquí se verá inmediatamente en todos los dispositivos conectados.</div>
+      <div class="notice"><strong>🔥 Firebase:</strong> Cualquier cambio se verá en todos los dispositivos conectados.</div>
       <div class="stabs">
-        <button class="stab active" onclick="stab('general',this)">General</button>
-        <button class="stab" onclick="stab('colors',this)">Colores</button>
+        <button class="stab active" onclick="stab('cfg-general',this)">General</button>
+        <button class="stab" onclick="stab('cfg-colors',this)">Colores</button>
       </div>
-      <div class="stab-content active" id="stab-general">
+      <div class="stab-content active" id="stab-cfg-general">
         <div class="stitle">Identidad</div>
         <div class="sg">
           <div class="sf"><label>Nombre / Marca</label><input class="si" id="cfg-brand" placeholder="PROCADE"></div>
-          <div class="sf"><label>Subtítulo</label><input class="si" id="cfg-sub" placeholder="· Sistema de Costeo"></div>
+          <div class="sf"><label>Subtítulo</label><input class="si" id="cfg-sub" placeholder="· ERP Alimentos"></div>
           <div class="sf"><label>Símbolo de Moneda</label><input class="si" id="cfg-currency" placeholder="S/"></div>
         </div>
       </div>
-      <div class="stab-content" id="stab-colors">
+      <div class="stab-content" id="stab-cfg-colors">
         <div class="stitle">Tema de Color</div>
         <div class="sg">
           <div class="sf">
@@ -571,8 +609,6 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
               <div class="sw" style="background:#2ecc71" onclick="setColor('cfg-accent','--accent','#2ecc71')"></div>
               <div class="sw" style="background:#9b59b6" onclick="setColor('cfg-accent','--accent','#9b59b6')"></div>
               <div class="sw" style="background:#f39c12" onclick="setColor('cfg-accent','--accent','#f39c12')"></div>
-              <div class="sw" style="background:#1abc9c" onclick="setColor('cfg-accent','--accent','#1abc9c')"></div>
-              <div class="sw" style="background:#e91e63" onclick="setColor('cfg-accent','--accent','#e91e63')"></div>
             </div>
           </div>
           <div class="sf">
@@ -589,10 +625,10 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
       </div>
     </div>
 
-    <!-- ADMIN -->
+    <!-- ── ADMINISTRADOR ── -->
     <div class="page" id="page-admin">
       <div class="ph">
-        <div><div class="pt">👥 Gestión de Usuarios</div><div class="ps">Aprueba o rechaza solicitudes de acceso en tiempo real</div></div>
+        <div><div class="pt">👥 Administrador</div><div class="ps">Gestión de usuarios, roles y accesos</div></div>
         <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">↺ Actualizar</button>
       </div>
       <div class="panel" style="margin-bottom:16px;">
@@ -607,13 +643,12 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <div style="padding:0 16px;" id="all-users-list"><div style="text-align:center;padding:22px;color:var(--text-dim)">Cargando…</div></div>
       </div>
     </div>
-
-  </div><!-- /content -->
+  </div>
 </main>
 
 </div><!-- /app -->
 
-<!-- ── MODALS ── -->
+<!-- ── MODAL: NUEVA RECETA ── -->
 <div class="modal-overlay" id="modal-new-recipe"><div class="modal">
   <div class="modal-title">Nueva Receta</div>
   <div class="form-grid">
@@ -629,6 +664,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   </div>
 </div></div>
 
+<!-- ── MODAL: NUEVO INSUMO ── -->
 <div class="modal-overlay" id="modal-new-ing"><div class="modal">
   <div class="modal-title">Nuevo Insumo</div>
   <div class="form-grid">
@@ -636,17 +672,18 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="ff"><label>Nombre</label><input id="ni-name" placeholder="ej. Tomate Cherry"></div>
     <div class="ff"><label>Categoría</label><select id="ni-cat"><option>Vegetales</option><option>Proteinas</option><option>Condimentos</option><option>Salsas</option><option>Aditivos</option><option>Empaque</option><option>Endulzantes</option></select></div>
     <div class="ff"><label>Proveedor</label><input id="ni-prov" value="Makro"></div>
-    <div class="ff"><label>Costo Master (precio total pagado)</label><input id="ni-cmaster" type="number" step="0.01" value="0"></div>
-    <div class="ff"><label>UM Empaque (g o unidades totales)</label><input id="ni-um" type="number" value="1000"></div>
+    <div class="ff"><label>Costo Master (precio total)</label><input id="ni-cmaster" type="number" step="0.01" value="0"></div>
+    <div class="ff"><label>UM Empaque (g o unidades)</label><input id="ni-um" type="number" value="1000"></div>
     <div class="ff"><label>Descripción UM</label><input id="ni-desc" placeholder="Gramos"></div>
     <div class="ff"><label>País</label><input id="ni-pais" value="Peru"></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-secondary" onclick="closeModal('modal-new-ing')">Cancelar</button>
-    <button class="btn btn-primary" onclick="addIngredient()">Guardar Insumo</button>
+    <button class="btn btn-primary" onclick="addInsumo()">Guardar Insumo</button>
   </div>
 </div></div>
 
+<!-- ── MODAL: AGREGAR INSUMO A RECETA ── -->
 <div class="modal-overlay" id="modal-add-ing"><div class="modal">
   <div class="modal-title">Agregar Insumo a Receta</div>
   <div class="form-grid">
@@ -666,8 +703,9 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   </div>
 </div></div>
 
-<div class="modal-overlay" id="modal-purchase"><div class="modal">
-  <div class="modal-title">📦 Registrar Compra</div>
+<!-- ── MODAL: REGISTRAR COMPRA ── -->
+<div class="modal-overlay" id="modal-new-compra"><div class="modal">
+  <div class="modal-title">🛒 Registrar Compra</div>
   <div class="form-grid">
     <div class="ff full"><label>Insumo</label>
       <div class="ing-wrap">
@@ -680,136 +718,192 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <div class="ff"><label>Proveedor</label><input id="pur-prov" placeholder="Makro, Mitu…"></div>
     <div class="ff"><label>Cantidad (g / unidades)</label><input id="pur-qty" type="number" step="0.1" value="1000" min="0" oninput="calcPurCPG()"></div>
     <div class="ff"><label>Precio Total Pagado</label><input id="pur-price" type="number" step="0.01" value="0" min="0" oninput="calcPurCPG()"></div>
-    <div class="ff full"><label>Costo/g (calculado)</label><input id="pur-cpg" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;"></div>
-    <div class="ff full"><label>Notas (opcional)</label><textarea id="pur-notes" rows="2" placeholder="ej. Oferta mensual…" style="resize:vertical;"></textarea></div>
+    <div class="ff full"><label>Costo/g (calculado)</label><input id="pur-cpg" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;width:100%;outline:none;"></div>
+    <div class="ff full"><label>Notas (opcional)</label><textarea id="pur-notes" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea></div>
     <div class="ff full">
-      <div class="toggle-row"><input type="checkbox" id="pur-upd" checked><label for="pur-upd">Actualizar el Costo Master de este insumo con el precio de esta compra</label></div>
-      <div class="form-hint">Los costos de recetas se recalcularán automáticamente para todos los usuarios.</div>
+      <div class="toggle-row"><input type="checkbox" id="pur-upd" checked><label for="pur-upd">Actualizar el Costo Master del insumo con esta compra</label></div>
+      <div class="form-hint">Los costos de recetas se recalcularán automáticamente.</div>
     </div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-secondary" onclick="closeModal('modal-purchase')">Cancelar</button>
-    <button class="btn btn-primary" onclick="submitPurchase()">💾 Guardar Compra</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-new-compra')">Cancelar</button>
+    <button class="btn btn-primary" onclick="submitCompra()">💾 Guardar Compra</button>
   </div>
 </div></div>
 
+<!-- ── MODAL: NUEVA ORDEN DE PRODUCCIÓN ── -->
+<div class="modal-overlay" id="modal-new-prod"><div class="modal">
+  <div class="modal-title">🏭 Nueva Orden de Producción</div>
+  <div class="form-grid">
+    <div class="ff full"><label>Receta</label><select id="prod-receta" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"><option value="">Seleccionar…</option></select></div>
+    <div class="ff"><label>Cantidad de Lotes</label><input id="prod-lotes" type="number" value="1" min="1"></div>
+    <div class="ff"><label>Fecha</label><input id="prod-fecha" type="date"></div>
+    <div class="ff"><label>Operario Responsable</label><input id="prod-operario" placeholder="Nombre del operario"></div>
+    <div class="ff"><label>Estado</label>
+      <select id="prod-estado" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
+        <option value="pendiente">Pendiente</option>
+        <option value="en proceso">En Proceso</option>
+        <option value="completado">Completado</option>
+      </select>
+    </div>
+    <div class="ff full"><label>Notas</label><textarea id="prod-notas" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeModal('modal-new-prod')">Cancelar</button>
+    <button class="btn btn-primary" onclick="submitProduccion()">💾 Guardar Orden</button>
+  </div>
+</div></div>
+
+<!-- ── MODAL: NUEVA VENTA ── -->
+<div class="modal-overlay" id="modal-new-venta"><div class="modal">
+  <div class="modal-title">💰 Nueva Venta</div>
+  <div class="form-grid">
+    <div class="ff full"><label>Producto</label><input id="ven-producto" placeholder="ej. Tikka Massala 370ml"></div>
+    <div class="ff"><label>Cantidad (unidades)</label><input id="ven-qty" type="number" value="1" min="1" oninput="calcVentaTotal()"></div>
+    <div class="ff"><label>Precio Unitario</label><input id="ven-precio" type="number" step="0.01" value="0" oninput="calcVentaTotal()"></div>
+    <div class="ff full"><label>Total (calculado)</label><input id="ven-total" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;width:100%;outline:none;"></div>
+    <div class="ff"><label>Fecha</label><input id="ven-fecha" type="date"></div>
+    <div class="ff"><label>Cliente</label><input id="ven-cliente" placeholder="Nombre del cliente"></div>
+    <div class="ff"><label>Estado</label>
+      <select id="ven-estado" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
+        <option value="pendiente">Pendiente</option>
+        <option value="entregado">Entregado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+    <div class="ff full"><label>Notas</label><textarea id="ven-notas" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeModal('modal-new-venta')">Cancelar</button>
+    <button class="btn btn-primary" onclick="submitVenta()">💾 Guardar Venta</button>
+  </div>
+</div></div>
 <div id="toast"></div>
-
-<!-- ── FIREBASE SDKs ── -->
 <script type="module">
-import { initializeApp }                                from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
-                                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+                           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, set, get, push, remove, onValue, off, update }
-                                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+                           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-// ════════════════════════════════════════════════════════════
-// FIREBASE INIT
-// ════════════════════════════════════════════════════════════
-const app  = initializeApp(FIREBASE_CONFIG);
-const auth = getAuth(app);
-const db   = getDatabase(app);
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+const fbApp = initializeApp(FIREBASE_CONFIG);
+const auth  = getAuth(fbApp);
+const db    = getDatabase(fbApp);
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// ROLES & PERMISOS
+// ════════════════════════════════════════════════════════
+const ROLE_MODULES = {
+  admin:      ['dashboard','formulacion','insumos','produccion','compras','ventas','inventario','admin','settings'],
+  produccion: ['dashboard','formulacion','insumos','produccion','inventario'],
+  compras:    ['dashboard','compras','insumos','inventario'],
+  ventas:     ['dashboard','ventas','inventario'],
+  consulta:   ['dashboard','formulacion','insumos','produccion','compras','ventas','inventario'],
+};
+
+function canAccess(mod) {
+  if (!CUR) return false;
+  const role = CUR.role || 'consulta';
+  return (ROLE_MODULES[role] || []).includes(mod);
+}
+function canWrite() {
+  return CUR && CUR.role !== 'consulta';
+}
+function roleLabel(role) {
+  const m = {admin:'Admin',produccion:'Producción',compras:'Compras',ventas:'Ventas',consulta:'Consulta'};
+  return m[role] || role || '—';
+}
+function roleBadge(role) {
+  return `<span class="role-badge rb-${role||'consulta'}">${roleLabel(role)}</span>`;
+}
+
+// ════════════════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════════════
-let DB   = { ingredients:{}, recipes:{}, inventory:{}, config:{}, users:{} };
-let CUR  = null; // current user profile
+// ════════════════════════════════════════════════════════
+let DB = { insumos:{}, recetas:{}, produccion:{}, compras:{}, ventas:{}, usuarios:{}, config:{} };
+let CUR = null;
 let CUR_RECIPE_ID = null;
-let AI_CODE = null, PUR_CODE = null; // selected codes in modals
-let RT_LISTENERS = []; // track listeners to clean up
+let AI_CODE = null, PUR_CODE = null;
+let RT_LISTENERS = [];
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // HELPERS
-// ════════════════════════════════════════════════════════════
-const cur  = () => DB.config['currency'] || 'S/';
-const fmt  = n  => cur() + Number(n||0).toFixed(2);
-const fmtG = n  => Number(n||0).toFixed(4);
-const ingCPG = i => (!i||!i.um||i.um==0) ? 0 : i.cmaster/i.um;
-const getCP  = code => { const i=DB.ingredients[code]; return i?ingCPG(i):0; };
-const escH   = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ════════════════════════════════════════════════════════
+const cur   = () => DB.config['currency'] || 'S/';
+const fmt   = n  => cur() + Number(n||0).toFixed(2);
+const fmtG  = n  => Number(n||0).toFixed(4);
+const insumoCPG = i => (!i||!i.um||i.um==0) ? 0 : i.cmaster/i.um;
+const getCPG    = code => { const i=DB.insumos[code]; return i ? insumoCPG(i) : 0; };
+const escH  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function calcCosts(r) {
-  let cu=0;
-  Object.values(r.ingredients||{}).forEach(ri => { cu += getCP(ri.code)*ri.qty; });
-  return { unit: cu, total: cu*(r.orden||0) };
+  let cu = 0;
+  Object.values(r.ingredients||{}).forEach(ri => { cu += getCPG(ri.code) * ri.qty; });
+  return { unit: cu, total: cu * (r.orden||0) };
 }
 
 function catTag(cat) {
-  const m={Proteinas:'tag-protein',Vegetales:'tag-veg',Condimentos:'tag-spice',Salsas:'tag-sauce',Empaque:'tag-pack',Aditivos:'tag-add',Endulzantes:'tag-spice',Procesador:'tag-other'};
+  const m = {Proteinas:'tag-protein',Vegetales:'tag-veg',Condimentos:'tag-spice',Salsas:'tag-sauce',Empaque:'tag-pack',Aditivos:'tag-add',Endulzantes:'tag-spice',Procesador:'tag-other'};
   return `<span class="tag ${m[cat]||'tag-other'}">${cat||''}</span>`;
 }
 
-const getR = () => DB.recipes[CUR_RECIPE_ID] || null;
+function estBadge(est) {
+  const map = {pendiente:'est-pendiente','en proceso':'est-proceso',completado:'est-completado',cancelado:'est-cancelado',entregado:'est-entregado'};
+  return `<span class="est-badge ${map[est]||'est-pendiente'}">${est||'pendiente'}</span>`;
+}
 
-// ════════════════════════════════════════════════════════════
+const getR = () => DB.recetas[CUR_RECIPE_ID] || null;
+
+function getStockInsumo(code) {
+  let t = 0;
+  Object.values(DB.compras).forEach(c => { if (c.ingCode === code) t += Number(c.qty||0); });
+  return t;
+}
+
+// ════════════════════════════════════════════════════════
 // SAVE INDICATOR
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 let saveTimer = null;
-function savePending() {
-  const el = document.getElementById('save-ind');
-  el.textContent = '◌ Guardando…'; el.className = 'save-ind si-saving';
-}
-function saveDone() {
-  const el = document.getElementById('save-ind');
-  el.textContent = '✓ Guardado'; el.className = 'save-ind si-ok';
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { el.textContent='✓ Sincronizado'; el.className='save-ind si-idle'; }, 2500);
-}
-function saveErr() {
-  const el = document.getElementById('save-ind');
-  el.textContent = '✗ Error'; el.className = 'save-ind si-err';
-}
+function savePending() { const el=document.getElementById('save-ind'); el.textContent='◌ Guardando…'; el.className='save-ind si-saving'; }
+function saveDone()    { const el=document.getElementById('save-ind'); el.textContent='✓ Guardado'; el.className='save-ind si-ok'; clearTimeout(saveTimer); saveTimer=setTimeout(()=>{el.textContent='✓ Sincronizado';el.className='save-ind si-idle';},2500); }
+function saveErr()     { const el=document.getElementById('save-ind'); el.textContent='✗ Error'; el.className='save-ind si-err'; }
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // FIREBASE WRITE HELPERS
-// ════════════════════════════════════════════════════════════
-async function fbSet(path, data) {
-  savePending();
-  try { await set(ref(db, path), data); saveDone(); return true; }
-  catch(e) { saveErr(); toast('Error: '+e.message, true); return false; }
-}
-async function fbUpdate(path, data) {
-  savePending();
-  try { await update(ref(db, path), data); saveDone(); return true; }
-  catch(e) { saveErr(); toast('Error: '+e.message, true); return false; }
-}
-async function fbRemove(path) {
-  savePending();
-  try { await remove(ref(db, path)); saveDone(); return true; }
-  catch(e) { saveErr(); toast('Error: '+e.message, true); return false; }
-}
+// ════════════════════════════════════════════════════════
+async function fbSet(path, data)    { savePending(); try { await set(ref(db,path),data); saveDone(); return true; } catch(e) { saveErr(); toast('Error: '+e.message,true); return false; } }
+async function fbUpdate(path, data) { savePending(); try { await update(ref(db,path),data); saveDone(); return true; } catch(e) { saveErr(); toast('Error: '+e.message,true); return false; } }
+async function fbRemove(path)       { savePending(); try { await remove(ref(db,path)); saveDone(); return true; } catch(e) { saveErr(); toast('Error: '+e.message,true); return false; } }
 
-// ════════════════════════════════════════════════════════════
-// REAL-TIME LISTENERS — subscribe once, auto-update UI
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// REAL-TIME LISTENERS
+// ════════════════════════════════════════════════════════
 function subscribeAll() {
   const paths = {
-    ingredients: () => { renderIngsTable(); renderSidebar(); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
-    recipes:     () => { renderRecipeGrid(); renderSidebar(); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
-    inventory:   () => { renderInventory(); renderDashboard(); },
-    config:      () => { applyConfig(); },
-    users:       () => { if(CUR?.isAdmin) loadAdminUsers(); }
+    insumos:    () => { renderInsumosTable(); renderSidebar(); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
+    recetas:    () => { renderRecipeGrid(); renderSidebar(); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
+    produccion: () => { renderProduccion(); renderDashboard(); renderSidebar(); renderInvProductos(); },
+    compras:    () => { renderCompras(); renderDashboard(); renderSidebar(); renderInvInsumos(); },
+    ventas:     () => { renderVentas(); renderDashboard(); renderSidebar(); },
+    usuarios:   () => { if(CUR?.role==='admin') loadAdminUsers(); },
+    config:     () => { applyConfig(); },
   };
-
   Object.entries(paths).forEach(([key, handler]) => {
     const r = ref(db, key);
-    onValue(r, snap => {
-      DB[key] = snap.val() || {};
-      handler();
-    });
+    onValue(r, snap => { DB[key] = snap.val() || {}; handler(); });
     RT_LISTENERS.push({ ref: r });
   });
-
-  // RT dot
   document.getElementById('rt-dot').style.background = 'var(--green)';
 }
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // AUTH FLOW
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 function showScreen(id) {
-  ['screen-welcome','screen-signin','screen-request','screen-pending','screen-rejected']
+  ['screen-signin','screen-request','screen-pending','screen-rejected']
     .forEach(s => { const el=document.getElementById(s); if(el){el.classList.remove('show');el.style.display='none';} });
   document.getElementById('app').style.display = 'none';
   const el = document.getElementById(id);
@@ -824,8 +918,7 @@ window.signInWithGoogle = async () => {
 
 window.signOut = async () => {
   if (!confirm('¿Cerrar sesión?')) return;
-  RT_LISTENERS.forEach(l => off(l.ref));
-  RT_LISTENERS = [];
+  RT_LISTENERS.forEach(l => off(l.ref)); RT_LISTENERS = [];
   await fbSignOut(auth);
   showScreen('screen-signin');
 };
@@ -834,102 +927,218 @@ onAuthStateChanged(auth, async user => {
   const ls = document.getElementById('loading-screen');
   if (!user) {
     ls.classList.add('out'); setTimeout(()=>ls.style.display='none',500);
-    showScreen('screen-signin');
-    return;
+    showScreen('screen-signin'); return;
   }
 
-  // Build profile
   const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   let name = user.displayName || user.email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   let initials = name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || '?';
-
-  // Check/create user record in Firebase
   const userKey = user.uid;
-  const userRef  = ref(db, `users/${userKey}`);
-  const snap     = await get(userRef);
-  let userRecord = snap.val();
 
-  if (!userRecord) {
-    // First time — create record
-    userRecord = {
-      email: user.email, name, uid: userKey,
-      role: isAdmin ? 'admin' : 'user',
-      status: isAdmin ? 'approved' : 'pending',
-      requestDate: new Date().toISOString(),
-      approvedDate: isAdmin ? new Date().toISOString() : '',
-      lastLogin: new Date().toISOString()
-    };
-    await set(userRef, userRecord);
+  // Try new path first, fallback to old 'users/' for migration
+  let snap = await get(ref(db, `usuarios/${userKey}`));
+  let rec  = snap.val();
+
+  if (!rec) {
+    // Check old path for migration
+    const oldSnap = await get(ref(db, `users/${userKey}`));
+    const oldRec  = oldSnap.val();
+    rec = oldRec ? { ...oldRec, role: oldRec.role==='admin'?'admin':'consulta' } : null;
+  }
+
+  if (!rec) {
+    rec = { email:user.email, name, uid:userKey, role:isAdmin?'admin':'consulta',
+            status:isAdmin?'approved':'pending', requestDate:new Date().toISOString(),
+            approvedDate:isAdmin?new Date().toISOString():'', lastLogin:new Date().toISOString() };
+    await set(ref(db, `usuarios/${userKey}`), rec);
   } else {
-    // Update last login
-    await update(userRef, { lastLogin: new Date().toISOString() });
-    // Admin always approved
-    if (isAdmin && userRecord.status !== 'approved') {
-      await update(userRef, { status:'approved', role:'admin' });
-      userRecord.status = 'approved'; userRecord.role = 'admin';
+    await update(ref(db, `usuarios/${userKey}`), { lastLogin:new Date().toISOString() });
+    if (isAdmin && rec.status !== 'approved') {
+      await update(ref(db, `usuarios/${userKey}`), { status:'approved', role:'admin' });
+      rec.status='approved'; rec.role='admin';
     }
   }
 
-  CUR = { ...userRecord, name, initials, photo: user.photoURL||'', isAdmin: isAdmin || userRecord.role==='admin' };
+  CUR = { ...rec, name, initials, photo:user.photoURL||'', role: isAdmin ? 'admin' : (rec.role||'consulta') };
 
-  // Hide loading
   ls.classList.add('out'); setTimeout(()=>ls.style.display='none',500);
 
   if (CUR.status === 'approved') {
-    // Start real-time listeners & show app
-    subscribeAll();
-    populateHeader();
-    seedDefaultData();
-    showScreen('app');
-    switchTab('dashboard');
+    subscribeAll(); populateHeader(); seedDefaultData();
+    showScreen('app'); switchTab('dashboard');
   } else if (CUR.status === 'pending') {
     document.getElementById('pen-email').textContent = user.email;
     showScreen('screen-pending');
   } else if (CUR.status === 'rejected') {
     showScreen('screen-rejected');
   } else {
-    // Should request
     document.getElementById('req-email').textContent = user.email;
     document.getElementById('req-name').value = name;
     showScreen('screen-request');
   }
 });
 
-window.enterDashboard = () => {
-  const s = document.getElementById('screen-welcome');
-  s.style.transition='opacity .35s ease'; s.style.opacity='0';
-  setTimeout(()=>{s.style.display='none';},360);
-};
-
 window.submitRequest = async () => {
-  const name = document.getElementById('req-name').value.trim();
-  const msg  = document.getElementById('req-msg').value.trim();
-  if (!name) { toast('Ingresa tu nombre', true); return; }
-  const btn = document.getElementById('req-btn');
-  btn.textContent = '⏳ Enviando…'; btn.disabled = true;
-  const user = auth.currentUser;
-  if (!user) { toast('Error de sesión', true); return; }
-  await update(ref(db, `users/${user.uid}`), {
-    name, status:'pending', message: msg,
-    requestDate: new Date().toISOString()
-  });
-  document.getElementById('pen-email').textContent = user.email;
+  const name=document.getElementById('req-name').value.trim(), msg=document.getElementById('req-msg').value.trim();
+  if (!name) { toast('Ingresa tu nombre',true); return; }
+  const btn=document.getElementById('req-btn'); btn.textContent='⏳ Enviando…'; btn.disabled=true;
+  const user=auth.currentUser; if(!user){toast('Error de sesión',true);return;}
+  await update(ref(db,`usuarios/${user.uid}`),{name,status:'pending',message:msg,requestDate:new Date().toISOString()});
+  document.getElementById('pen-email').textContent=user.email;
   showScreen('screen-pending');
 };
 
-// ════════════════════════════════════════════════════════════
-// SEED — only if DB is empty
-// ════════════════════════════════════════════════════════════
-async function seedDefaultData() {
-  const snap = await get(ref(db,'ingredients'));
-  if (snap.val()) return; // already seeded
+// ════════════════════════════════════════════════════════
+// HEADER & CONFIG
+// ════════════════════════════════════════════════════════
+function populateHeader() {
+  const p = CUR;
+  document.getElementById('pill-init').textContent = p.initials;
+  document.getElementById('pill-name').textContent = p.name;
+  document.getElementById('dd-name').textContent   = p.name;
+  document.getElementById('dd-email').textContent  = p.email;
+  document.getElementById('dd-role').innerHTML     = roleBadge(p.role);
+  if (p.photo) {
+    const av=document.getElementById('pill-av');
+    av.innerHTML=`<img src="${p.photo}" onerror="this.style.display='none'">`;
+  }
+  if (p.role === 'admin') {
+    document.getElementById('nav-admin').style.display='';
+    document.getElementById('dd-admin-item').style.display='';
+  }
+  // Hide nav buttons based on role
+  ['dashboard','formulacion','insumos','produccion','compras','ventas','inventario'].forEach(mod => {
+    const btn = document.getElementById('nav-'+mod);
+    if (btn) btn.style.display = canAccess(mod) ? '' : 'none';
+  });
+  applyWriteRestrictions();
+}
 
-  const ings = {
+function applyWriteRestrictions() {
+  if (canWrite()) return;
+  // consulta: hide all action buttons
+  ['btn-new-recipe','btn-new-insumo','btn-new-prod','btn-new-compra','btn-new-venta','btn-delete-recipe','btn-add-ing'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+}
+
+function applyConfig() {
+  const c=DB.config;
+  const brand=c['brand']||'PROCADE', sub=c['sub']||'· ERP Alimentos';
+  document.getElementById('hdr-brand').textContent=brand;
+  document.getElementById('hdr-sub').textContent=' '+sub;
+  document.title=brand+' · ERP Alimentos';
+  ['--accent','--green','--bg','--surface','--surface2','--surface3','--border','--text','--text-muted','--text-dim']
+    .forEach(v=>{ if(c['color'+v]) document.documentElement.style.setProperty(v,c['color'+v]); });
+}
+function applyColor(v,val){ DB.config['color'+v]=val; document.documentElement.style.setProperty(v,val); }
+window.applyColor=applyColor;
+window.setColor=(id,v,val)=>{ const el=document.getElementById(id); if(el)el.value=val; applyColor(v,val); };
+window.setTheme=(bg,s,s2,s3,b,t,m,d)=>{
+  const map={'--bg':bg,'--surface':s,'--surface2':s2,'--surface3':s3,'--border':b,'--text':t,'--text-muted':m,'--text-dim':d};
+  Object.entries(map).forEach(([k,v])=>applyColor(k,v));
+  const el=document.getElementById('cfg-bg'); if(el)el.value=bg;
+};
+window.saveSettings=async()=>{
+  const c=DB.config;
+  c['brand']=document.getElementById('cfg-brand').value||'PROCADE';
+  c['sub']=document.getElementById('cfg-sub').value||'· ERP Alimentos';
+  c['currency']=document.getElementById('cfg-currency').value||'S/';
+  const acc=document.getElementById('cfg-accent'); if(acc) c['color--accent']=acc.value;
+  const bg=document.getElementById('cfg-bg');     if(bg)  c['color--bg']=bg.value;
+  await fbSet('config',c); toast('✓ Configuración guardada');
+};
+function populateSettingsInputs(){
+  const c=DB.config,g=(id,k,def)=>{const el=document.getElementById(id);if(el)el.value=c[k]||def;};
+  g('cfg-brand','brand','PROCADE'); g('cfg-sub','sub','· ERP Alimentos'); g('cfg-currency','currency','S/');
+  const ca=document.getElementById('cfg-accent'); if(ca) ca.value=c['color--accent']||'#d4a84b';
+  const cb=document.getElementById('cfg-bg');     if(cb) cb.value=c['color--bg']||'#0f0e0b';
+}
+
+// ════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════════
+window.switchTab = tab => {
+  if (!canAccess(tab) && tab !== 'settings') { toast('Sin permiso para este módulo', true); return; }
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+tab); if(nb) nb.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+tab); if(pg) pg.classList.add('active');
+  renderSidebar(tab);
+  if (tab==='dashboard')   renderDashboard();
+  if (tab==='formulacion') { renderRecipeGrid(); renderPricing(); }
+  if (tab==='insumos')     renderInsumosTable();
+  if (tab==='produccion')  renderProduccion();
+  if (tab==='compras')     renderCompras();
+  if (tab==='ventas')      renderVentas();
+  if (tab==='inventario')  renderInvInsumos();
+  if (tab==='settings')    populateSettingsInputs();
+  if (tab==='admin')       loadAdminUsers();
+};
+
+// ════════════════════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════════════════════
+function renderSidebar(tab) {
+  const sb=document.getElementById('sidebar-content'); if(!sb) return;
+  let html='';
+  if (tab==='formulacion'||tab==='recipe-detail') {
+    const recs=Object.values(DB.recetas);
+    html=`<div class="sb-label">Recetas</div>
+      ${recs.map(r=>`<div class="sb-item${CUR_RECIPE_ID===r.id?' active':''}" onclick="openRecipe('${r.id}')"><span>${escH(r.name)}</span><span class="badge">${r.orden}</span></div>`).join('')}
+      ${canWrite()?`<button class="add-btn" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>`:''}
+      <div class="sb-label" style="margin-top:12px">Categorías</div>
+      <div class="sb-item" onclick="filterRecipesByCat('')">📋 Todas <span class="badge">${recs.length}</span></div>
+      ${['Salsas','Proteinas','Condimentos','Otro'].map(c=>{const n=recs.filter(r=>r.cat===c).length;return n?`<div class="sb-item" onclick="filterRecipesByCat('${c}')">${c} <span class="badge">${n}</span></div>`:''}).join('')}`;
+  } else if (tab==='insumos') {
+    const cats=[...new Set(Object.values(DB.insumos).map(i=>i.cat))].filter(Boolean).sort();
+    html=`<div class="sb-label">Insumos</div>
+      <div class="sb-item active">📦 Todos <span class="badge">${Object.keys(DB.insumos).length}</span></div>
+      <div class="sb-label" style="margin-top:12px">Categorías</div>
+      ${cats.map(c=>{const n=Object.values(DB.insumos).filter(i=>i.cat===c).length;return`<div class="sb-item" onclick="filterInsumosByCat('${c}')">${c} <span class="badge">${n}</span></div>`;}).join('')}`;
+  } else if (tab==='produccion') {
+    const all=Object.values(DB.produccion), byS=s=>all.filter(p=>p.estado===s).length;
+    html=`<div class="sb-label">Por Estado</div>
+      <div class="sb-item">⏳ Pendiente <span class="badge">${byS('pendiente')}</span></div>
+      <div class="sb-item">🔄 En Proceso <span class="badge">${byS('en proceso')}</span></div>
+      <div class="sb-item">✓ Completado <span class="badge">${byS('completado')}</span></div>`;
+  } else if (tab==='compras') {
+    html=`<div class="sb-label">Compras</div>
+      <div class="sb-item active">📋 Todas <span class="badge">${Object.keys(DB.compras).length}</span></div>`;
+  } else if (tab==='ventas') {
+    const all=Object.values(DB.ventas);
+    html=`<div class="sb-label">Ventas</div>
+      <div class="sb-item active">📋 Todas <span class="badge">${all.length}</span></div>
+      <div class="sb-label" style="margin-top:12px">Por Estado</div>
+      ${['pendiente','entregado','cancelado'].map(s=>{const n=all.filter(v=>v.estado===s).length;return`<div class="sb-item">${s.charAt(0).toUpperCase()+s.slice(1)} <span class="badge">${n}</span></div>`;}).join('')}`;
+  } else if (tab==='inventario') {
+    const si=new Set(Object.values(DB.compras).map(c=>c.ingCode)).size;
+    const sp=new Set(Object.values(DB.produccion).filter(p=>p.estado==='completado').map(p=>p.recetaId)).size;
+    html=`<div class="sb-label">Inventario</div>
+      <div class="sb-item">🧪 Insumos <span class="badge">${si}</span></div>
+      <div class="sb-item">📦 Productos <span class="badge">${sp}</span></div>`;
+  } else {
+    const mods=[{id:'formulacion',icon:'🍳',label:'Formulación'},{id:'insumos',icon:'🧪',label:'Insumos'},{id:'produccion',icon:'🏭',label:'Producción'},{id:'compras',icon:'🛒',label:'Compras'},{id:'ventas',icon:'💰',label:'Ventas'},{id:'inventario',icon:'📦',label:'Inventario'}];
+    html=`<div class="sb-label">Módulos</div>
+      ${mods.filter(m=>canAccess(m.id)).map(m=>`<div class="sb-item" onclick="switchTab('${m.id}')">${m.icon} ${m.label}</div>`).join('')}
+      <div class="sb-label" style="margin-top:12px">Resumen</div>
+      <div class="sb-item">🍳 ${Object.keys(DB.recetas).length} Recetas</div>
+      <div class="sb-item">🧪 ${Object.keys(DB.insumos).length} Insumos</div>
+      <div class="sb-item">🏭 ${Object.keys(DB.produccion).length} Prod.</div>`;
+  }
+  sb.innerHTML=html;
+}
+
+// ════════════════════════════════════════════════════════
+// SEED DATA (first-time)
+// ════════════════════════════════════════════════════════
+async function seedDefaultData() {
+  const snap=await get(ref(db,'insumos')); if(snap.val()) return;
+  const insumos={
     AciCitrico001:{code:'AciCitrico001',name:'Acido Citrico',cat:'Aditivos',prov:'Mitu',cmaster:18,um:1000,desc:'Gramos',pais:'Peru'},
     Albahaca001:{code:'Albahaca001',name:'Albahaca',cat:'Vegetales',prov:'Makro',cmaster:15,um:1000,desc:'Gramos',pais:'Peru'},
     AzucarM001:{code:'AzucarM001',name:'Azucar Morena',cat:'Endulzantes',prov:'Makro',cmaster:16.9,um:5000,desc:'Gramos',pais:'Peru'},
     BbqMap001:{code:'BbqMap001',name:'BBQ Maple',cat:'Salsas',prov:'PROCADE',cmaster:8.35,um:1000,desc:'Gramos',pais:'Peru'},
-    Bondiola001:{code:'Bondiola001',name:'Bondiola sin hueso',cat:'Proteinas',prov:'Makro',cmaster:28.5,um:1000,desc:'Gramos',pais:'Peru'},
     CanelaP001:{code:'CanelaP001',name:'Canela en polvo',cat:'Condimentos',prov:'Mitu',cmaster:80,um:1000,desc:'Gramos',pais:'Peru'},
     Cebolla001:{code:'Cebolla001',name:'Cebolla Blanca',cat:'Vegetales',prov:'Makro',cmaster:2.61,um:1000,desc:'Gramos',pais:'Peru'},
     CominoM001:{code:'CominoM001',name:'Comino molido',cat:'Condimentos',prov:'Mitu',cmaster:32,um:1000,desc:'Gramos',pais:'Peru'},
@@ -940,179 +1149,100 @@ async function seedDefaultData() {
     GarMas001:{code:'GarMas001',name:'Garam Massala',cat:'Condimentos',prov:'Ecuador',cmaster:80,um:1000,desc:'Gramos',pais:'Peru'},
     Ketchup001:{code:'Ketchup001',name:'Ketchup',cat:'Salsas',prov:'Tottus',cmaster:27,um:4000,desc:'Gramos',pais:'Peru'},
     LCoco001:{code:'LCoco001',name:'Leche de Coco',cat:'Condimentos',prov:'Mercado',cmaster:20,um:400,desc:'Gramos',pais:'Peru'},
-    Melaza001:{code:'Melaza001',name:'Melaza de caña',cat:'Condimentos',prov:'Molino del Rio',cmaster:95,um:30000,desc:'Gramos',pais:'Peru'},
+    Melaza001:{code:'Melaza001',name:'Melaza de caña',cat:'Condimentos',prov:'Mitu',cmaster:95,um:30000,desc:'Gramos',pais:'Peru'},
     MieMap001:{code:'MieMap001',name:'Maple',cat:'Salsas',prov:'Tottus',cmaster:70,um:5000,desc:'Gramos',pais:'Peru'},
     PaprikaD001:{code:'PaprikaD001',name:'Paprika Dulce',cat:'Condimentos',prov:'Mitu',cmaster:29.9,um:1000,desc:'Gramos',pais:'Peru'},
     PastaTom001:{code:'PastaTom001',name:'Pasta de Tomate',cat:'Procesador',prov:'Makro',cmaster:0,um:3000,desc:'Gramos',pais:'Peru'},
     Pimienta001:{code:'Pimienta001',name:'Pimienta negra molida',cat:'Condimentos',prov:'Mitu',cmaster:44,um:1000,desc:'Gramos',pais:'Peru'},
-    PolloDad001:{code:'PolloDad001',name:'Pollo en cubos',cat:'Proteinas',prov:'Aro',cmaster:0,um:1000,desc:'Gramos',pais:'Peru'},
     PulPier002:{code:'PulPier002',name:'Pulled Pork Pierna',cat:'Proteinas',prov:'PROCADE',cmaster:28.88,um:1000,desc:'Gramos',pais:'Peru'},
     Sal001:{code:'Sal001',name:'Sal de mesa',cat:'Condimentos',prov:'Makro',cmaster:1.3,um:1000,desc:'Gramos',pais:'Peru'},
-    SorPot001:{code:'SorPot001',name:'Sorbato de potasio',cat:'Aditivos',prov:'Mitu',cmaster:29,um:1000,desc:'Gramos',pais:'Peru'},
     Tapa63:{code:'Tapa63',name:'Tapa metal 63mm',cat:'Empaque',prov:'Solumsac',cmaster:0.39,um:1,desc:'Unidad',pais:'Peru'},
-    TikkaMassala:{code:'TikkaMassala',name:'Tikka Massala Salsa',cat:'Salsas',prov:'PROCADE',cmaster:11.102,um:1000,desc:'Gramos',pais:'Peru'},
     Tomate001:{code:'Tomate001',name:'Tomate Italiano Rojo',cat:'Vegetales',prov:'Makro',cmaster:6,um:1000,desc:'Gramos',pais:'Peru'},
     VinMAN:{code:'VinMAN',name:'Vinagre Manzana',cat:'Condimentos',prov:'Mercado',cmaster:46,um:4000,desc:'Gramos',pais:'Peru'},
     AjiAmaril001:{code:'AjiAmaril001',name:'Aji Amarillo',cat:'Vegetales',prov:'Makro',cmaster:16.3125,um:1000,desc:'Gramos',pais:'Peru'},
     JugMAN:{code:'JugMAN',name:'Jugo de Manzana',cat:'Salsas',prov:'Tottus',cmaster:5.5,um:1450,desc:'Gramos',pais:'Peru'},
   };
-  await set(ref(db,'ingredients'), ings);
-
-  const recipes = {
-    TM: { id:'TM', name:'Tikka Massala', cat:'Salsas', orden:10, envase:370, precio:0,
-      ingredients: { i0:{code:'Tomate001',qty:220},i1:{code:'Cebolla001',qty:65},i2:{code:'PastaTom001',qty:50},i3:{code:'AzucarM001',qty:35},i4:{code:'PaprikaD001',qty:1.5},i5:{code:'Sal001',qty:1.5},i6:{code:'Pimienta001',qty:1.5},i7:{code:'CanelaP001',qty:1.5},i8:{code:'CominoM001',qty:1.5},i9:{code:'LCoco001',qty:40},i10:{code:'Curcuma001',qty:1.5},i11:{code:'Corian001',qty:1.5},i12:{code:'GarMas001',qty:1.5} }},
-    BBQ_MP: { id:'BBQ_MP', name:'BBQ Maple', cat:'Salsas', orden:20, envase:370, precio:0,
-      ingredients: { i0:{code:'Ketchup001',qty:200},i1:{code:'AzucarM001',qty:120},i2:{code:'Melaza001',qty:20},i3:{code:'VinMAN',qty:18},i4:{code:'MieMap001',qty:100},i5:{code:'CanelaP001',qty:3.75},i6:{code:'PaprikaD001',qty:3},i7:{code:'AciCitrico001',qty:3.75} }},
-    PULLBBQ: { id:'PULLBBQ', name:'Pulled BBQ', cat:'Proteinas', orden:1, envase:225, precio:0,
-      ingredients: { i0:{code:'PulPier002',qty:150},i1:{code:'BbqMap001',qty:75},i2:{code:'EtiMarca001',qty:1} }},
+  await set(ref(db,'insumos'),insumos);
+  const recetas={
+    TM:{id:'TM',name:'Tikka Massala',cat:'Salsas',orden:10,envase:370,precio:0,ingredients:{i0:{code:'Tomate001',qty:220},i1:{code:'Cebolla001',qty:65},i2:{code:'PastaTom001',qty:50},i3:{code:'AzucarM001',qty:35},i4:{code:'PaprikaD001',qty:1.5},i5:{code:'Sal001',qty:1.5},i6:{code:'Pimienta001',qty:1.5},i7:{code:'CanelaP001',qty:1.5},i8:{code:'CominoM001',qty:1.5},i9:{code:'LCoco001',qty:40},i10:{code:'Curcuma001',qty:1.5},i11:{code:'Corian001',qty:1.5},i12:{code:'GarMas001',qty:1.5}}},
+    BBQ_MP:{id:'BBQ_MP',name:'BBQ Maple',cat:'Salsas',orden:20,envase:370,precio:0,ingredients:{i0:{code:'Ketchup001',qty:200},i1:{code:'AzucarM001',qty:120},i2:{code:'Melaza001',qty:20},i3:{code:'VinMAN',qty:18},i4:{code:'MieMap001',qty:100},i5:{code:'CanelaP001',qty:3.75},i6:{code:'PaprikaD001',qty:3},i7:{code:'AciCitrico001',qty:3.75}}},
+    PULLBBQ:{id:'PULLBBQ',name:'Pulled BBQ',cat:'Proteinas',orden:1,envase:225,precio:0,ingredients:{i0:{code:'PulPier002',qty:150},i1:{code:'BbqMap001',qty:75},i2:{code:'EtiMarca001',qty:1}}},
   };
-  await set(ref(db,'recipes'), recipes);
+  await set(ref(db,'recetas'),recetas);
   toast('✓ Datos iniciales cargados');
 }
 
-// ════════════════════════════════════════════════════════════
-// HEADER & CONFIG
-// ════════════════════════════════════════════════════════════
-function populateHeader() {
-  const p = CUR;
-  document.getElementById('wel-name').textContent    = p.name;
-  document.getElementById('wel-email').textContent   = p.email;
-  document.getElementById('wel-initials').textContent= p.initials;
-  document.getElementById('wel-time').textContent    = 'Sesión iniciada · ' + new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('pill-init').textContent   = p.initials;
-  document.getElementById('pill-name').textContent   = p.name;
-  document.getElementById('dd-name').textContent     = p.name;
-  document.getElementById('dd-email').textContent    = p.email;
-  if (p.photo) {
-    ['wel-avatar','pill-av'].forEach(id=>{
-      const el=document.getElementById(id);
-      el.innerHTML=`<img src="${p.photo}" onerror="this.style.display='none'">`;
-    });
-  }
-  if (p.isAdmin) {
-    document.getElementById('nav-admin').style.display='';
-    document.getElementById('dd-admin-item').style.display='';
-  }
-}
-
-function applyConfig() {
-  const c = DB.config;
-  const brand = c['brand']||'PROCADE', sub = c['sub']||'· Sistema de Costeo';
-  document.getElementById('hdr-brand').textContent = brand;
-  document.getElementById('hdr-sub').textContent   = ' ' + sub;
-  document.title = brand + ' · Sistema de Costeo';
-  const colors = ['--accent','--green','--bg','--surface','--surface2','--surface3','--border','--text','--text-muted','--text-dim'];
-  colors.forEach(v => { if(c['color'+v]) document.documentElement.style.setProperty(v,c['color'+v]); });
-}
-
-function applyColor(v, val) {
-  DB.config['color'+v] = val;
-  document.documentElement.style.setProperty(v, val);
-}
-window.applyColor = applyColor;
-
-window.setColor = (id, v, val) => { const el=document.getElementById(id); if(el)el.value=val; applyColor(v,val); };
-window.setTheme = (bg,s,s2,s3,b,t,m,d) => {
-  const map={'--bg':bg,'--surface':s,'--surface2':s2,'--surface3':s3,'--border':b,'--text':t,'--text-muted':m,'--text-dim':d};
-  Object.entries(map).forEach(([k,v])=>applyColor(k,v));
-  const el=document.getElementById('cfg-bg'); if(el)el.value=bg;
-};
-
-window.saveSettings = async () => {
-  const c = DB.config;
-  c['brand']    = document.getElementById('cfg-brand').value||'PROCADE';
-  c['sub']      = document.getElementById('cfg-sub').value||'· Sistema de Costeo';
-  c['currency'] = document.getElementById('cfg-currency').value||'S/';
-  const acc = document.getElementById('cfg-accent'); if(acc) c['color--accent']=acc.value;
-  const bg  = document.getElementById('cfg-bg');     if(bg)  c['color--bg']=bg.value;
-  await fbSet('config', c);
-  toast('✓ Configuración guardada para todos');
-};
-
-function populateSettingsInputs() {
-  const c = DB.config;
-  const g = (id,k,def) => { const el=document.getElementById(id); if(el) el.value=c[k]||def; };
-  g('cfg-brand','brand','PROCADE'); g('cfg-sub','sub','· Sistema de Costeo'); g('cfg-currency','currency','S/');
-  const ca=document.getElementById('cfg-accent'); if(ca) ca.value=c['color--accent']||'#d4a84b';
-  const cb=document.getElementById('cfg-bg');     if(cb) cb.value=c['color--bg']||'#0f0e0b';
-}
-
-// ════════════════════════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════════════════════════
-window.switchTab = tab => {
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  const nb=document.getElementById('nav-'+tab); if(nb)nb.classList.add('active');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const pg=document.getElementById('page-'+tab); if(pg)pg.classList.add('active');
-  if(tab==='dashboard')   renderDashboard();
-  if(tab==='recipes')     renderRecipeGrid();
-  if(tab==='ingredients') renderIngsTable();
-  if(tab==='pricing')     renderPricing();
-  if(tab==='inventory')   renderInventory();
-  if(tab==='settings')    populateSettingsInputs();
-  if(tab==='admin')       loadAdminUsers();
-};
-
-// ════════════════════════════════════════════════════════════
-// RENDER: SIDEBAR
-// ════════════════════════════════════════════════════════════
-function renderSidebar() {
-  const recs = Object.values(DB.recipes);
-  const inv  = Object.values(DB.inventory);
-  const ings = Object.values(DB.ingredients);
-  document.getElementById('recipe-list-sidebar').innerHTML = recs.map(r =>
-    `<div class="sb-item${CUR_RECIPE_ID===r.id?' active':''}" onclick="openRecipe('${r.id}')"><span>${r.name}</span><span class="badge">${r.orden}</span></div>`
-  ).join('');
-  document.getElementById('badge-all').textContent       = recs.length;
-  document.getElementById('badge-salsas').textContent    = recs.filter(r=>r.cat==='Salsas').length;
-  document.getElementById('badge-proteinas').textContent = recs.filter(r=>r.cat==='Proteinas').length;
-  document.getElementById('badge-inv').textContent       = inv.length;
-  document.getElementById('badge-ings').textContent      = ings.length;
-}
-
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // RENDER: DASHBOARD
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 function renderDashboard() {
-  const recs = Object.values(DB.recipes);
-  const inv  = Object.values(DB.inventory);
-  let totalInv=0; recs.forEach(r=>{ totalInv+=calcCosts(r).total; });
-  let totalStock=0; inv.forEach(i=>{ totalStock+=Number(i.pricePaid||0); });
-  document.getElementById('st-recipes').textContent = recs.length;
-  document.getElementById('st-ings').textContent    = Object.keys(DB.ingredients).length;
-  document.getElementById('st-inv').textContent     = fmt(totalInv);
-  document.getElementById('st-stock').textContent   = fmt(totalStock);
-  document.getElementById('dash-table').innerHTML   = recs.map(r => {
+  document.getElementById('st-recetas').textContent = Object.keys(DB.recetas).length;
+  document.getElementById('st-insumos').textContent = Object.keys(DB.insumos).length;
+  const mes = new Date().toISOString().slice(0,7);
+  const prodMes = Object.values(DB.produccion).filter(p=>p.fecha&&p.fecha.startsWith(mes)).length;
+  document.getElementById('st-prod').textContent = prodMes;
+  const ingMes = Object.values(DB.ventas).filter(v=>v.fecha&&v.fecha.startsWith(mes)).reduce((s,v)=>s+Number(v.total||0),0);
+  document.getElementById('st-ventas').textContent = fmt(ingMes);
+
+  document.getElementById('dash-recetas').innerHTML = Object.values(DB.recetas).map(r=>{
     const c=calcCosts(r), mg=r.precio>0?((r.precio-c.unit)/r.precio*100).toFixed(1)+'%':'—';
-    const mc=r.precio>c.unit?'green':(r.precio===0?'':'red');
-    return `<tr onclick="openRecipe('${r.id}')" style="cursor:pointer"><td><strong>${r.name}</strong></td><td class="mono">${r.orden}</td><td class="mono">${r.envase}ml</td><td class="mono">${Object.keys(r.ingredients||{}).length}</td><td class="accent mono">${fmt(c.unit)}</td><td class="mono">${fmt(c.total)}</td><td class="mono">${r.precio>0?fmt(r.precio):'<span style="color:var(--text-dim)">—</span>'}</td><td class="${mc} mono">${mg}</td></tr>`;
-  }).join('');
+    const mc=r.precio>c.unit?'green':(r.precio===0?'muted':'red');
+    return `<tr onclick="openRecipe('${r.id}')" style="cursor:pointer"><td><strong>${escH(r.name)}</strong><br><span class="muted" style="font-size:10px">${r.cat}</span></td><td class="accent mono">${fmt(c.unit)}</td><td class="mono">${r.precio>0?fmt(r.precio):'<span style="color:var(--text-dim)">—</span>'}</td><td class="${mc} mono">${mg}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">Sin recetas</td></tr>';
+
+  document.getElementById('dash-prod').innerHTML = Object.values(DB.produccion)
+    .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,5)
+    .map(p=>`<tr><td>${escH(p.recetaNombre||'—')}</td><td class="mono">${p.lotes}</td><td class="mono muted">${p.fecha||'—'}</td><td>${estBadge(p.estado)}</td></tr>`).join('')
+    || '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">Sin órdenes</td></tr>';
+
+  document.getElementById('dash-ventas').innerHTML = Object.values(DB.ventas)
+    .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,5)
+    .map(v=>`<tr><td class="mono muted">${v.fecha||'—'}</td><td>${escH(v.producto||'—')}</td><td class="mono">${v.qty}</td><td class="accent mono">${fmt(v.total)}</td><td class="muted">${escH(v.cliente||'—')}</td><td>${estBadge(v.estado)}</td></tr>`).join('')
+    || '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">Sin ventas</td></tr>';
 }
 
-// ════════════════════════════════════════════════════════════
-// RENDER: RECIPE GRID
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// RENDER: FORMULACIÓN — RECIPE GRID
+// ════════════════════════════════════════════════════════
+let recipeFilter = '';
+window.filterRecipesByCat = cat => { recipeFilter=cat; renderRecipeGrid(); };
+
 function renderRecipeGrid() {
   const q=(document.getElementById('recipe-search')||{value:''}).value.toLowerCase();
-  const recs=Object.values(DB.recipes).filter(r=>r.name.toLowerCase().includes(q)||r.cat.toLowerCase().includes(q));
+  const recs=Object.values(DB.recetas).filter(r=>{
+    const matchQ=r.name.toLowerCase().includes(q)||(r.cat||'').toLowerCase().includes(q);
+    const matchC=!recipeFilter||(r.cat===recipeFilter);
+    return matchQ&&matchC;
+  });
   const grid=document.getElementById('recipe-grid');
+  if(!grid) return;
   if(!recs.length){grid.innerHTML='<div style="text-align:center;padding:48px;color:var(--text-dim)">🍳<br><br>No se encontraron recetas</div>';return;}
   grid.innerHTML=recs.map(r=>{
-    const c=calcCosts(r),mg=r.precio>0?((r.precio-c.unit)/r.precio*100).toFixed(1)+'%':'—';
-    return `<div class="recipe-card" onclick="openRecipe('${r.id}')"><div class="rc-name">${r.name}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div><div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Orden</div><div class="val">${r.orden} lotes</div></div><div class="rc-stat"><div class="lbl">Inversión</div><div class="val">${fmt(c.total)}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div></div>`;
+    const c=calcCosts(r), mg=r.precio>0?((r.precio-c.unit)/r.precio*100).toFixed(1)+'%':'—';
+    return `<div class="recipe-card" onclick="openRecipe('${r.id}')"><div class="rc-name">${escH(r.name)}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div><div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Orden</div><div class="val">${r.orden} lotes</div></div><div class="rc-stat"><div class="lbl">Inversión</div><div class="val">${fmt(c.total)}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div></div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-// RECIPE DETAIL
-// ════════════════════════════════════════════════════════════
+function renderPricing() {
+  const el=document.getElementById('pricing-rows'); if(!el) return;
+  el.innerHTML=Object.values(DB.recetas).map(r=>{
+    const c=calcCosts(r), mg=r.precio>0?(r.precio-c.unit)/r.precio*100:0;
+    const mc=mg>40?'var(--green)':mg>20?'var(--accent)':'var(--red)';
+    const priceInput=canWrite()
+      ?`<input style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:5px 9px;font-family:'DM Mono',monospace;font-size:12px;width:95px;outline:none" type="number" step="0.01" value="${r.precio}" onchange="updateRecipePrecio('${r.id}',Number(this.value))">`
+      :`<span style="font-family:'DM Mono',monospace">${fmt(r.precio)}</span>`;
+    return `<div class="price-row"><div><div style="font-weight:600">${escH(r.name)}</div><div style="color:var(--text-muted);font-size:10px">${r.cat} · Costo MP: ${fmt(c.unit)}/un</div><div class="mg-bar" style="width:160px;margin-top:5px"><div class="mg-fill" style="width:${Math.min(mg,100)}%;background:${mc}"></div></div></div><div><div class="price-lbl">Costo Unit.</div><div style="font-family:'DM Mono',monospace;color:var(--accent)">${fmt(c.unit)}</div></div><div><div class="price-lbl">Precio Venta</div>${priceInput}</div><div><div class="price-lbl">Margen</div><div style="font-family:'DM Mono',monospace;color:${mc};font-size:14px">${mg.toFixed(1)}%</div></div><div><div class="price-lbl">Ganancia/un</div><div style="font-family:'DM Mono',monospace;color:${mc}">${fmt(r.precio-c.unit)}</div></div></div>`;
+  }).join('');
+}
+
+// ── Recipe Detail ──
 window.openRecipe = id => {
-  CUR_RECIPE_ID = id; renderSidebar();
+  CUR_RECIPE_ID=id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-recipe-detail').classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  document.getElementById('nav-recipes').classList.add('active');
+  const nb=document.getElementById('nav-formulacion'); if(nb) nb.classList.add('active');
+  renderSidebar('recipe-detail');
   renderRecipeDetail();
 };
 
@@ -1120,12 +1250,13 @@ function renderRecipeDetail() {
   const r=getR(); if(!r) return;
   document.getElementById('det-name').textContent=r.name;
   document.getElementById('det-sub').textContent=r.cat+' · '+Object.keys(r.ingredients||{}).length+' insumos';
+  const ro=!canWrite();
   document.getElementById('det-fields').innerHTML=`
-    <div class="rf-field"><label>Nombre</label><input value="${r.name}" onchange="updateRecipeField('name',this.value)"></div>
-    <div class="rf-field"><label>Orden de Producción</label><input type="number" value="${r.orden}" onchange="updateRecipeField('orden',Number(this.value))"></div>
-    <div class="rf-field"><label>Tamaño Envase (ml/g)</label><input type="number" value="${r.envase}" onchange="updateRecipeField('envase',Number(this.value))"></div>
-    <div class="rf-field"><label>Precio de Venta</label><input type="number" step="0.01" value="${r.precio}" onchange="updateRecipeField('precio',Number(this.value))"></div>
-    <div class="rf-field"><label>Categoría</label><select onchange="updateRecipeField('cat',this.value)">${['Salsas','Proteinas','Condimentos','Otro'].map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
+    <div class="rf-field"><label>Nombre</label><input value="${escH(r.name)}" ${ro?'readonly':''} onchange="updateRecipeField('name',this.value)"></div>
+    <div class="rf-field"><label>Orden de Producción</label><input type="number" value="${r.orden}" ${ro?'readonly':''} onchange="updateRecipeField('orden',Number(this.value))"></div>
+    <div class="rf-field"><label>Tamaño Envase (ml/g)</label><input type="number" value="${r.envase}" ${ro?'readonly':''} onchange="updateRecipeField('envase',Number(this.value))"></div>
+    <div class="rf-field"><label>Precio de Venta</label><input type="number" step="0.01" value="${r.precio}" ${ro?'readonly':''} onchange="updateRecipeField('precio',Number(this.value))"></div>
+    <div class="rf-field"><label>Categoría</label><select ${ro?'disabled':''} onchange="updateRecipeField('cat',this.value)">${['Salsas','Proteinas','Condimentos','Otro'].map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
   refreshDetail();
 }
 
@@ -1138,302 +1269,424 @@ function refreshDetail() {
   const cm=document.getElementById('cb-margin'); cm.textContent=mg;
   cm.className='cb-val '+(r.precio>c.unit?'green':(r.precio===0?'':'red'));
   let tu=0,tp=0;
-  const ings=Object.entries(r.ingredients||{});
-  document.getElementById('det-ings').innerHTML=ings.map(([key,ri],idx)=>{
-    const ing=DB.ingredients[ri.code],cpg=ing?ingCPG(ing):0,cu=cpg*ri.qty,ct=cu*r.orden;
-    tu+=cu;tp+=ct;
-    return `<tr><td class="mono" style="color:var(--text-dim)">${ri.code}</td><td>${ing?ing.name:`<span style="color:var(--red)">${ri.code}</span>`}</td><td>${ing?catTag(ing.cat):''}</td><td class="mono" style="color:var(--text-muted)">${fmtG(cpg)}</td><td><input class="editable mono" type="number" value="${ri.qty}" step="0.1" min="0" onchange="updateIngQty('${key}',Number(this.value))"></td><td class="accent mono">${fmt(cu)}</td><td class="mono">${fmt(ct)}</td><td><button class="icon-btn danger" onclick="removeIngFromRecipe('${key}')">✕</button></td></tr>`;
+  document.getElementById('det-ings').innerHTML=Object.entries(r.ingredients||{}).map(([key,ri])=>{
+    const ing=DB.insumos[ri.code],cpg=ing?insumoCPG(ing):0,cu=cpg*ri.qty,ct=cu*r.orden;
+    tu+=cu; tp+=ct;
+    const qtyCell=canWrite()
+      ?`<input class="editable mono" type="number" value="${ri.qty}" step="0.1" min="0" onchange="updateIngQty('${key}',Number(this.value))">`
+      :`${ri.qty}`;
+    const delBtn=canWrite()?`<button class="icon-btn danger" onclick="removeIngFromRecipe('${key}')">✕</button>`:'';
+    return `<tr><td class="mono" style="color:var(--text-dim)">${ri.code}</td><td>${ing?escH(ing.name):`<span style="color:var(--red)">${ri.code}</span>`}</td><td>${ing?catTag(ing.cat):''}</td><td class="mono" style="color:var(--text-muted)">${fmtG(cpg)}</td><td>${qtyCell}</td><td class="accent mono">${fmt(cu)}</td><td class="mono">${fmt(ct)}</td><td>${delBtn}</td></tr>`;
   }).join('');
   document.getElementById('det-tot-u').textContent=fmt(tu);
   document.getElementById('det-tot-p').textContent=fmt(tp);
 }
 
-window.updateRecipeField = async (field, val) => {
+window.updateRecipeField = async (field,val) => {
   if(!CUR_RECIPE_ID) return;
-  await fbUpdate(`recipes/${CUR_RECIPE_ID}`, {[field]:val});
-  DB.recipes[CUR_RECIPE_ID][field] = val;
-  renderSidebar(); renderDashboard();
+  await fbUpdate(`recetas/${CUR_RECIPE_ID}`,{[field]:val});
+  DB.recetas[CUR_RECIPE_ID][field]=val;
+  renderSidebar('recipe-detail'); renderDashboard();
   if(field==='precio'||field==='orden'||field==='envase') refreshDetail();
 };
-
-window.updateIngQty = async (key, qty) => {
+window.updateIngQty = async (key,qty) => {
   if(!CUR_RECIPE_ID) return;
-  await fbUpdate(`recipes/${CUR_RECIPE_ID}/ingredients/${key}`, {qty});
+  await fbUpdate(`recetas/${CUR_RECIPE_ID}/ingredients/${key}`,{qty});
   refreshDetail();
 };
-
 window.removeIngFromRecipe = async key => {
   if(!CUR_RECIPE_ID) return;
-  await fbRemove(`recipes/${CUR_RECIPE_ID}/ingredients/${key}`);
-  delete DB.recipes[CUR_RECIPE_ID].ingredients[key];
+  await fbRemove(`recetas/${CUR_RECIPE_ID}/ingredients/${key}`);
+  delete DB.recetas[CUR_RECIPE_ID].ingredients[key];
   refreshDetail();
 };
-
 window.deleteCurrentRecipe = async () => {
   if(!CUR_RECIPE_ID||!confirm('¿Eliminar esta receta?')) return;
-  await fbRemove(`recipes/${CUR_RECIPE_ID}`);
-  delete DB.recipes[CUR_RECIPE_ID];
-  CUR_RECIPE_ID = null;
-  renderSidebar(); renderDashboard();
-  switchTab('recipes');
-  toast('Receta eliminada');
+  await fbRemove(`recetas/${CUR_RECIPE_ID}`);
+  delete DB.recetas[CUR_RECIPE_ID]; CUR_RECIPE_ID=null;
+  renderSidebar('formulacion'); renderDashboard(); switchTab('formulacion'); toast('Receta eliminada');
 };
-
-// ════════════════════════════════════════════════════════════
-// RENDER: INGREDIENTS
-// ════════════════════════════════════════════════════════════
-function renderIngsTable() {
-  const q=(document.getElementById('ing-search')||{value:''}).value.toLowerCase();
-  const ings=Object.values(DB.ingredients).filter(i=>i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)||(i.cat||'').toLowerCase().includes(q));
-  document.getElementById('ings-table').innerHTML=ings.map(ing=>{
-    const cpg=ingCPG(ing), stock=getStock(ing.code);
-    return `<tr><td class="mono" style="color:var(--text-dim)">${ing.code}</td><td>${ing.name}</td><td>${catTag(ing.cat)}</td><td class="muted">${ing.prov||''}</td><td class="muted">${ing.desc||''}</td><td><input class="editable accent mono" type="number" step="0.01" value="${ing.cmaster}" onchange="updateIngCost('${ing.code}',Number(this.value))"></td><td class="mono">${ing.um}</td><td class="accent mono">${fmtG(cpg)}</td><td>${stock>0?`<span class="inv-badge inv-ok">${stock.toFixed(0)}</span>`:'<span class="inv-badge inv-zero">0</span>'}</td><td><button class="icon-btn danger" onclick="deleteIngredient('${ing.code}')">✕</button></td></tr>`;
-  }).join('');
-}
-
-function getStock(code) {
-  let t=0; Object.values(DB.inventory).forEach(i=>{ if(i.ingCode===code) t+=Number(i.qty||0); }); return t;
-}
-
-window.updateIngCost = async (code, val) => {
-  await fbUpdate(`ingredients/${code}`, {cmaster:val});
-  if(DB.ingredients[code]) DB.ingredients[code].cmaster=val;
-  refreshDetail();
-  toast('Precio actualizado para todos');
-};
-
-window.deleteIngredient = async code => {
-  if(!confirm('¿Eliminar este insumo?')) return;
-  await fbRemove(`ingredients/${code}`);
-  delete DB.ingredients[code];
-  renderIngsTable(); renderSidebar(); toast('Insumo eliminado');
-};
-
-// ════════════════════════════════════════════════════════════
-// RENDER: PRICING
-// ════════════════════════════════════════════════════════════
-function renderPricing() {
-  document.getElementById('pricing-rows').innerHTML=Object.values(DB.recipes).map(r=>{
-    const c=calcCosts(r),mg=r.precio>0?(r.precio-c.unit)/r.precio*100:0;
-    const mc=mg>40?'var(--green)':mg>20?'var(--accent)':'var(--red)';
-    return `<div class="price-row"><div><div style="font-weight:600">${r.name}</div><div style="color:var(--text-muted);font-size:10px">${r.cat} · Costo MP: ${fmt(c.unit)}/un</div><div class="mg-bar" style="width:160px;margin-top:5px"><div class="mg-fill" style="width:${Math.min(mg,100)}%;background:${mc}"></div></div></div><div><div class="price-lbl">Costo Unit.</div><div style="font-family:'DM Mono',monospace;color:var(--accent)">${fmt(c.unit)}</div></div><div><div class="price-lbl">Precio Venta</div><input style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:5px 9px;font-family:'DM Mono',monospace;font-size:12px;width:95px;outline:none" type="number" step="0.01" value="${r.precio}" onchange="updateRecipePrecio('${r.id}',Number(this.value))" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></div><div><div class="price-lbl">Margen</div><div style="font-family:'DM Mono',monospace;color:${mc};font-size:14px">${mg.toFixed(1)}%</div></div><div><div class="price-lbl">Ganancia/un</div><div style="font-family:'DM Mono',monospace;color:${mc}">${fmt(r.precio-c.unit)}</div></div></div>`;
-  }).join('');
-}
-
-window.updateRecipePrecio = async (id, val) => {
-  await fbUpdate(`recipes/${id}`, {precio:val});
-  if(DB.recipes[id]) DB.recipes[id].precio=val;
+window.updateRecipePrecio = async (id,val) => {
+  await fbUpdate(`recetas/${id}`,{precio:val});
+  if(DB.recetas[id]) DB.recetas[id].precio=val;
   renderDashboard();
 };
 
-// ════════════════════════════════════════════════════════════
-// RENDER: INVENTORY
-// ════════════════════════════════════════════════════════════
-function renderInventory() {
-  const q=(document.getElementById('inv-search')||{value:''}).value.toLowerCase();
-  const flt=(document.getElementById('inv-filter')||{value:''}).value;
-  let inv=Object.values(DB.inventory).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(flt) inv=inv.filter(i=>i.ingCode===flt);
-  if(q)   inv=inv.filter(i=>(i.ingName||'').toLowerCase().includes(q)||(i.ingCode||'').toLowerCase().includes(q));
+// ════════════════════════════════════════════════════════
+// RENDER: INSUMOS
+// ════════════════════════════════════════════════════════
+let insumoFilter='';
+window.filterInsumosByCat=cat=>{insumoFilter=cat; renderInsumosTable();};
 
-  let totalSpent=0; Object.values(DB.inventory).forEach(i=>totalSpent+=Number(i.pricePaid||0));
-  const ingSet=new Set(Object.values(DB.inventory).map(i=>i.ingCode));
-  document.getElementById('inv-st-mov').textContent  =Object.keys(DB.inventory).length;
-  document.getElementById('inv-st-total').textContent=fmt(totalSpent);
-  document.getElementById('inv-st-items').textContent=ingSet.size;
-
-  // Filter dropdown
-  const fe=document.getElementById('inv-filter'); const cv=fe?fe.value:'';
-  if(fe){ const codes={}; Object.values(DB.inventory).forEach(i=>{codes[i.ingCode]=i.ingName;});
-    fe.innerHTML='<option value="">Todos los insumos</option>'+Object.keys(codes).sort().map(c=>`<option value="${c}"${c===cv?' selected':''}>${codes[c]}</option>`).join(''); }
-
-  // Stock table
-  const stockMap={};
-  Object.values(DB.inventory).forEach(i=>{
-    if(!stockMap[i.ingCode]) stockMap[i.ingCode]={name:i.ingName,cat:'',qty:0,lastDate:'',lastPrice:0,lastCPG:0,count:0};
-    stockMap[i.ingCode].qty+=Number(i.qty||0); stockMap[i.ingCode].count++;
-    if(i.date>=stockMap[i.ingCode].lastDate){stockMap[i.ingCode].lastDate=i.date;stockMap[i.ingCode].lastPrice=Number(i.pricePaid||0);stockMap[i.ingCode].lastCPG=Number(i.costPerG||0);}
+function renderInsumosTable() {
+  const q=(document.getElementById('ing-search')||{value:''}).value.toLowerCase();
+  const ings=Object.values(DB.insumos).filter(i=>{
+    const mq=i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)||(i.cat||'').toLowerCase().includes(q);
+    return mq&&(!insumoFilter||i.cat===insumoFilter);
   });
-  Object.keys(stockMap).forEach(code=>{const ing=DB.ingredients[code];if(ing)stockMap[code].cat=ing.cat;});
-  document.getElementById('inv-stock').innerHTML=Object.keys(stockMap).map(code=>{
-    const s=stockMap[code];
-    return `<tr><td><strong>${s.name}</strong><br><span style="font-size:9px;color:var(--text-dim);font-family:'DM Mono',monospace">${code}</span></td><td>${catTag(s.cat)}</td><td class="accent mono">${s.qty.toFixed(1)}</td><td class="muted mono">${s.lastDate}</td><td class="mono">${fmt(s.lastPrice)}</td><td class="accent mono">${fmtG(s.lastCPG)}/g</td><td class="mono">${s.count}</td></tr>`;
-  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin compras aún. Usa "Registrar Compra" para comenzar.</td></tr>';
-
-  // Log
-  document.getElementById('inv-log').innerHTML=inv.map(i=>`<tr><td class="mono">${i.date}</td><td><strong>${i.ingName}</strong><br><span style="font-size:9px;color:var(--text-dim)">${i.ingCode}</span></td><td class="muted">${i.prov||''}</td><td class="mono">${Number(i.qty).toFixed(1)}</td><td class="accent mono">${fmt(i.pricePaid)}</td><td class="mono">${fmtG(i.costPerG)}/g</td><td class="muted" style="font-size:11px">${i.notes||''}</td><td><button class="icon-btn danger" onclick="deletePurchase('${i.id}')">✕</button></td></tr>`).join('')
-    ||'<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:20px">Sin compras registradas</td></tr>';
+  const delBtn=canWrite()?code=>`<button class="icon-btn danger" onclick="deleteInsumo('${code}')">✕</button>`:()=>'';
+  document.getElementById('insumos-table').innerHTML=ings.map(i=>{
+    const cpg=insumoCPG(i), stock=getStockInsumo(i.code);
+    const costCell=canWrite()
+      ?`<input class="editable accent mono" type="number" step="0.01" value="${i.cmaster}" onchange="updateInsumoCost('${i.code}',Number(this.value))">`
+      :`<span class="accent mono">${fmt(i.cmaster)}</span>`;
+    return `<tr><td class="mono" style="color:var(--text-dim)">${i.code}</td><td>${escH(i.name)}</td><td>${catTag(i.cat)}</td><td class="muted">${i.prov||''}</td><td class="muted">${i.desc||''}</td><td>${costCell}</td><td class="mono">${i.um}</td><td class="accent mono">${fmtG(cpg)}</td><td>${stock>0?`<span class="inv-badge inv-ok">${stock.toFixed(0)}</span>`:'<span class="inv-badge inv-zero">0</span>'}</td><td>${delBtn(i.code)}</td></tr>`;
+  }).join('');
 }
 
-window.deletePurchase = async id => {
-  if(!confirm('¿Eliminar esta compra?')) return;
-  await fbRemove(`inventory/${id}`);
-  delete DB.inventory[id];
-  renderInventory(); renderSidebar(); toast('Compra eliminada');
+window.updateInsumoCost = async (code,val) => {
+  await fbUpdate(`insumos/${code}`,{cmaster:val});
+  if(DB.insumos[code]) DB.insumos[code].cmaster=val;
+  refreshDetail(); toast('Precio actualizado');
+};
+window.deleteInsumo = async code => {
+  if(!confirm('¿Eliminar este insumo?')) return;
+  await fbRemove(`insumos/${code}`);
+  delete DB.insumos[code];
+  renderInsumosTable(); toast('Insumo eliminado');
 };
 
-// ════════════════════════════════════════════════════════════
-// MODALS
-// ════════════════════════════════════════════════════════════
-window.openModal  = id => document.getElementById(id).classList.add('open');
-window.closeModal = id => document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+// ════════════════════════════════════════════════════════
+// RENDER: PRODUCCIÓN
+// ════════════════════════════════════════════════════════
+function renderProduccion() {
+  const all=Object.values(DB.produccion).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  document.getElementById('prod-st-total').textContent=all.length;
+  document.getElementById('prod-st-proceso').textContent=all.filter(p=>p.estado==='en proceso').length;
+  document.getElementById('prod-st-completadas').textContent=all.filter(p=>p.estado==='completado').length;
+  const delBtn=canWrite()?id=>`<button class="icon-btn danger" onclick="deleteProd('${id}')">✕</button>`:()=>'';
+  document.getElementById('prod-table').innerHTML=all.map(p=>`
+    <tr><td class="mono muted">${p.fecha||'—'}</td><td><strong>${escH(p.recetaNombre||'—')}</strong></td><td class="mono">${p.lotes}</td><td class="muted">${escH(p.operario||'—')}</td><td>${estBadge(p.estado)}</td><td class="muted" style="font-size:11px">${escH(p.notas||'')}</td><td>${delBtn(p.id)}</td></tr>
+  `).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin órdenes de producción. Crea la primera.</td></tr>';
+}
 
-// NEW RECIPE
+window.deleteProd = async id => {
+  if(!confirm('¿Eliminar esta orden?')) return;
+  await fbRemove(`produccion/${id}`);
+  delete DB.produccion[id];
+  renderProduccion(); renderDashboard(); toast('Orden eliminada');
+};
+
+// ════════════════════════════════════════════════════════
+// RENDER: COMPRAS
+// ════════════════════════════════════════════════════════
+function renderCompras() {
+  const q=(document.getElementById('compras-search')||{value:''}).value.toLowerCase();
+  let all=Object.values(DB.compras).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(q) all=all.filter(c=>(c.ingName||'').toLowerCase().includes(q)||(c.ingCode||'').toLowerCase().includes(q));
+  let totalGasto=0; Object.values(DB.compras).forEach(c=>totalGasto+=Number(c.pricePaid||0));
+  const ingSet=new Set(Object.values(DB.compras).map(c=>c.ingCode));
+  document.getElementById('cmp-st-total').textContent=Object.keys(DB.compras).length;
+  document.getElementById('cmp-st-gasto').textContent=fmt(totalGasto);
+  document.getElementById('cmp-st-items').textContent=ingSet.size;
+  const delBtn=canWrite()?id=>`<button class="icon-btn danger" onclick="deleteCompra('${id}')">✕</button>`:()=>'';
+  document.getElementById('compras-table').innerHTML=all.map(c=>`
+    <tr><td class="mono muted">${c.date||'—'}</td><td><strong>${escH(c.ingName||'—')}</strong><br><span style="font-size:9px;color:var(--text-dim)">${c.ingCode}</span></td><td class="muted">${escH(c.prov||'')}</td><td class="mono">${Number(c.qty).toFixed(1)}</td><td class="accent mono">${fmt(c.pricePaid)}</td><td class="mono">${fmtG(c.costPerG)}/g</td><td class="muted" style="font-size:11px">${escH(c.notes||'')}</td><td>${delBtn(c.id)}</td></tr>
+  `).join()||'<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:28px">Sin compras registradas.</td></tr>';
+}
+
+window.deleteCompra = async id => {
+  if(!confirm('¿Eliminar esta compra?')) return;
+  await fbRemove(`compras/${id}`);
+  delete DB.compras[id];
+  renderCompras(); renderDashboard(); toast('Compra eliminada');
+};
+
+// ════════════════════════════════════════════════════════
+// RENDER: VENTAS
+// ════════════════════════════════════════════════════════
+function renderVentas() {
+  const all=Object.values(DB.ventas).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const mes=new Date().toISOString().slice(0,7);
+  const totalIng=all.reduce((s,v)=>s+Number(v.total||0),0);
+  const mesCnt=all.filter(v=>v.fecha&&v.fecha.startsWith(mes)).length;
+  document.getElementById('ven-st-total').textContent=all.length;
+  document.getElementById('ven-st-ingresos').textContent=fmt(totalIng);
+  document.getElementById('ven-st-mes').textContent=mesCnt;
+  const delBtn=canWrite()?id=>`<button class="icon-btn danger" onclick="deleteVenta('${id}')">✕</button>`:()=>'';
+  document.getElementById('ventas-table').innerHTML=all.map(v=>`
+    <tr><td class="mono muted">${v.fecha||'—'}</td><td><strong>${escH(v.producto||'—')}</strong></td><td class="mono">${v.qty}</td><td class="mono">${fmt(v.precioUnit)}</td><td class="accent mono">${fmt(v.total)}</td><td class="muted">${escH(v.cliente||'—')}</td><td>${estBadge(v.estado)}</td><td>${delBtn(v.id)}</td></tr>
+  `).join()||'<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:28px">Sin ventas registradas.</td></tr>';
+}
+
+window.deleteVenta = async id => {
+  if(!confirm('¿Eliminar esta venta?')) return;
+  await fbRemove(`ventas/${id}`);
+  delete DB.ventas[id];
+  renderVentas(); renderDashboard(); toast('Venta eliminada');
+};
+
+// ════════════════════════════════════════════════════════
+// RENDER: INVENTARIO
+// ════════════════════════════════════════════════════════
+function renderInvInsumos() {
+  const el=document.getElementById('inv-ins-table'); if(!el) return;
+  const stockMap={};
+  Object.values(DB.compras).forEach(c=>{
+    if(!stockMap[c.ingCode]) stockMap[c.ingCode]={name:c.ingName,cat:'',qty:0,lastDate:'',lastPrice:0,lastCPG:0,count:0};
+    stockMap[c.ingCode].qty+=Number(c.qty||0); stockMap[c.ingCode].count++;
+    if((c.date||'')>=(stockMap[c.ingCode].lastDate||'')){stockMap[c.ingCode].lastDate=c.date;stockMap[c.ingCode].lastPrice=Number(c.pricePaid||0);stockMap[c.ingCode].lastCPG=Number(c.costPerG||0);}
+  });
+  Object.keys(stockMap).forEach(code=>{const i=DB.insumos[code]; if(i) stockMap[code].cat=i.cat;});
+  el.innerHTML=Object.keys(stockMap).map(code=>{
+    const s=stockMap[code];
+    return `<tr><td><strong>${escH(s.name)}</strong><br><span style="font-size:9px;color:var(--text-dim)">${code}</span></td><td>${catTag(s.cat)}</td><td class="accent mono">${s.qty.toFixed(1)}</td><td class="muted mono">${s.lastDate||'—'}</td><td class="mono">${fmt(s.lastPrice)}</td><td class="accent mono">${fmtG(s.lastCPG)}/g</td><td class="mono">${s.count}</td></tr>`;
+  }).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin stock. Registra compras para ver el inventario.</td></tr>';
+}
+
+function renderInvProductos() {
+  const el=document.getElementById('inv-prod-table'); if(!el) return;
+  const prodMap={};
+  Object.values(DB.produccion).filter(p=>p.estado==='completado').forEach(p=>{
+    if(!prodMap[p.recetaId]) prodMap[p.recetaId]={nombre:p.recetaNombre,lotes:0,lastDate:'',count:0};
+    prodMap[p.recetaId].lotes+=Number(p.lotes||0); prodMap[p.recetaId].count++;
+    if((p.fecha||'')>=(prodMap[p.recetaId].lastDate||'')) prodMap[p.recetaId].lastDate=p.fecha;
+  });
+  el.innerHTML=Object.keys(prodMap).map(id=>{
+    const p=prodMap[id];
+    return `<tr><td><strong>${escH(p.nombre||id)}</strong></td><td class="accent mono">${p.lotes}</td><td class="muted mono">${p.lastDate||'—'}</td><td class="mono">${p.count}</td></tr>`;
+  }).join()||'<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:28px">Sin productos completados aún.</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════
+// ADMIN
+// ════════════════════════════════════════════════════════
+window.loadAdminUsers = async () => {
+  if(CUR?.role!=='admin') return;
+  const snap=await get(ref(db,'usuarios'));
+  renderAdminPanel(Object.values(snap.val()||{}));
+};
+
+function renderAdminPanel(users) {
+  const pending=users.filter(u=>u.status==='pending');
+  const rest=users.filter(u=>u.status!=='pending');
+  document.getElementById('pending-count').textContent=pending.length+' pendiente(s)';
+  document.getElementById('users-count').textContent=rest.length+' usuario(s)';
+
+  document.getElementById('pending-list').innerHTML=pending.length
+    ? pending.map(u=>`<div class="user-row"><div><div class="ur-name">${escH(u.name)}</div><div class="ur-email">${escH(u.email)}</div></div><div><span class="status-pill sp-pending">● Pendiente</span></div><div style="font-size:11px;color:var(--text-dim)">${escH(u.requestDate||'')}</div><div></div><div style="display:flex;gap:6px;align-items:center;">
+        <select onchange="changeUserRole('${escH(u.uid)}',this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px;font-size:11px;outline:none;">
+          ${['consulta','produccion','compras','ventas','admin'].map(r=>`<option value="${r}"${(u.role||'consulta')===r?' selected':''}>${roleLabel(r)}</option>`).join('')}
+        </select>
+        <button class="btn btn-green btn-sm" onclick="approveUser('${escH(u.uid)}','${escH(u.email)}')">✓ Aprobar</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectUser('${escH(u.uid)}')">✕</button>
+      </div></div>`).join('')
+    : '<div style="text-align:center;padding:20px;color:var(--text-dim)">✓ No hay solicitudes pendientes</div>';
+
+  document.getElementById('all-users-list').innerHTML=rest.length
+    ? rest.map(u=>{
+        const sc=u.status==='approved'?'sp-approved':u.status==='rejected'?'sp-rejected':'sp-pending';
+        const sl=u.status==='approved'?'✓ Aprobado':u.status==='rejected'?'✕ Rechazado':'● Pendiente';
+        return `<div class="user-row"><div><div class="ur-name">${escH(u.name)}</div><div class="ur-email">${escH(u.email)}</div></div><div><span class="status-pill ${sc}">${sl}</span></div><div>${roleBadge(u.role)}</div><div style="font-size:11px;color:var(--text-dim)">${escH(u.lastLogin||'—')}</div><div style="display:flex;gap:6px;align-items:center;">
+          <select onchange="changeUserRole('${escH(u.uid)}',this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px;font-size:11px;outline:none;">
+            ${['consulta','produccion','compras','ventas','admin'].map(r=>`<option value="${r}"${(u.role||'consulta')===r?' selected':''}>${roleLabel(r)}</option>`).join('')}
+          </select>
+          ${u.status!=='approved'?`<button class="btn btn-green btn-sm" onclick="approveUser('${escH(u.uid)}','${escH(u.email)}')">✓</button>`:''}
+          ${u.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="rejectUser('${escH(u.uid)}')">✕</button>`:''}
+          <button class="btn btn-secondary btn-sm" onclick="removeUser('${escH(u.uid)}')">🗑</button>
+        </div></div>`;
+      }).join('')
+    : '<div style="text-align:center;padding:20px;color:var(--text-dim)">Sin usuarios</div>';
+}
+
+window.approveUser = async (uid,email) => {
+  if(!confirm(`¿Aprobar acceso a ${email}?`)) return;
+  await fbUpdate(`usuarios/${uid}`,{status:'approved',approvedDate:new Date().toISOString(),approvedBy:CUR?.email||''});
+  loadAdminUsers(); toast('✓ Usuario aprobado');
+};
+window.rejectUser = async uid => {
+  if(!confirm('¿Rechazar esta solicitud?')) return;
+  await fbUpdate(`usuarios/${uid}`,{status:'rejected'});
+  loadAdminUsers(); toast('Solicitud rechazada');
+};
+window.removeUser = async uid => {
+  if(!confirm('¿Eliminar este usuario?')) return;
+  await fbRemove(`usuarios/${uid}`);
+  loadAdminUsers(); toast('Usuario eliminado');
+};
+window.changeUserRole = async (uid,role) => {
+  await fbUpdate(`usuarios/${uid}`,{role});
+  toast(`Rol actualizado: ${roleLabel(role)}`);
+};
+
+// ════════════════════════════════════════════════════════
+// MODALES — CRUD
+// ════════════════════════════════════════════════════════
+
+// ── Nueva Receta ──
 window.addRecipe = async () => {
-  const name=document.getElementById('nr-name').value.trim(); if(!name){toast('Ingresa un nombre',true);return;}
+  const name=document.getElementById('nr-name').value.trim();
+  if(!name){toast('Ingresa un nombre',true);return;}
   const id='R_'+Date.now();
   const recipe={id,name,cat:document.getElementById('nr-cat').value,orden:Number(document.getElementById('nr-orden').value)||10,envase:Number(document.getElementById('nr-envase').value)||370,precio:Number(document.getElementById('nr-precio').value)||0,ingredients:{}};
-  await fbSet(`recipes/${id}`, recipe);
-  DB.recipes[id]=recipe;
-  closeModal('modal-new-recipe'); renderSidebar(); renderDashboard();
+  await fbSet(`recetas/${id}`,recipe);
+  DB.recetas[id]=recipe;
+  closeModal('modal-new-recipe'); renderSidebar('formulacion'); renderDashboard();
   openRecipe(id); toast('✓ Receta creada');
 };
 
-// NEW INGREDIENT
-window.addIngredient = async () => {
+// ── Nuevo Insumo ──
+window.addInsumo = async () => {
   const code=document.getElementById('ni-code').value.trim(), name=document.getElementById('ni-name').value.trim();
   if(!code||!name){toast('Ingresa código y nombre',true);return;}
-  if(DB.ingredients[code]){toast('Código ya existe',true);return;}
+  if(DB.insumos[code]){toast('Código ya existe',true);return;}
   const ing={code,name,cat:document.getElementById('ni-cat').value,prov:document.getElementById('ni-prov').value,cmaster:Number(document.getElementById('ni-cmaster').value)||0,um:Number(document.getElementById('ni-um').value)||1000,desc:document.getElementById('ni-desc').value,pais:document.getElementById('ni-pais').value||'Peru'};
-  await fbSet(`ingredients/${code}`,ing);
-  DB.ingredients[code]=ing;
-  closeModal('modal-new-ing'); renderIngsTable(); renderSidebar(); toast('✓ Insumo guardado');
+  await fbSet(`insumos/${code}`,ing);
+  DB.insumos[code]=ing;
+  closeModal('modal-new-ing'); renderInsumosTable(); renderSidebar('insumos'); toast('✓ Insumo guardado');
 };
 
-// ADD ING TO RECIPE
+// ── Agregar Insumo a Receta ──
 window.filterAiDD = () => {
   const q=document.getElementById('ai-q').value.toLowerCase(), dd=document.getElementById('ai-dd');
-  const m=Object.values(DB.ingredients).filter(i=>i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)).slice(0,10);
+  const m=Object.values(DB.insumos).filter(i=>i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)).slice(0,10);
   if(!m.length){dd.classList.remove('open');return;}
-  dd.innerHTML=m.map(i=>`<div class="ing-opt" onclick="selectAiIng('${i.code}')"><span>${i.name}</span><span><span class="ing-code">${i.code}</span> <span class="ing-cost-tag">${fmtG(ingCPG(i))}/g</span></span></div>`).join('');
+  dd.innerHTML=m.map(i=>`<div class="ing-opt" onclick="selectAiIng('${i.code}')"><span>${escH(i.name)}</span><span><span class="ing-code">${i.code}</span> <span class="ing-cost-tag">${fmtG(insumoCPG(i))}/g</span></span></div>`).join('');
   dd.classList.add('open');
 };
 window.selectAiIng = code => {
-  AI_CODE=code; const ing=DB.ingredients[code];
-  document.getElementById('ai-q').value=ing.name; document.getElementById('ai-code').value=code; document.getElementById('ai-cost').value=fmtG(ingCPG(ing));
+  AI_CODE=code; const ing=DB.insumos[code];
+  document.getElementById('ai-q').value=ing.name;
+  document.getElementById('ai-code').value=code;
+  document.getElementById('ai-cost').value=fmtG(insumoCPG(ing));
   document.getElementById('ai-dd').classList.remove('open');
 };
 window.confirmAddIng = async () => {
   if(!AI_CODE){toast('Selecciona un insumo',true);return;}
-  const r=getR(); if(!r){return;}
-  const existing=Object.values(r.ingredients||{}).find(i=>i.code===AI_CODE);
-  if(existing){toast('Insumo ya está en la receta',true);return;}
+  const r=getR(); if(!r) return;
+  if(Object.values(r.ingredients||{}).find(i=>i.code===AI_CODE)){toast('Insumo ya está en la receta',true);return;}
   const qty=Number(document.getElementById('ai-qty').value)||1;
   const key='i'+Date.now();
-  await fbSet(`recipes/${CUR_RECIPE_ID}/ingredients/${key}`,{code:AI_CODE,qty});
-  if(!DB.recipes[CUR_RECIPE_ID].ingredients) DB.recipes[CUR_RECIPE_ID].ingredients={};
-  DB.recipes[CUR_RECIPE_ID].ingredients[key]={code:AI_CODE,qty};
+  await fbSet(`recetas/${CUR_RECIPE_ID}/ingredients/${key}`,{code:AI_CODE,qty});
+  if(!DB.recetas[CUR_RECIPE_ID].ingredients) DB.recetas[CUR_RECIPE_ID].ingredients={};
+  DB.recetas[CUR_RECIPE_ID].ingredients[key]={code:AI_CODE,qty};
   closeModal('modal-add-ing'); refreshDetail(); toast('✓ Insumo agregado');
 };
 
-// PURCHASE
+// ── Registrar Compra ──
 window.filterPurDD = () => {
   const q=document.getElementById('pur-q').value.toLowerCase(), dd=document.getElementById('pur-dd');
-  const m=Object.values(DB.ingredients).filter(i=>i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)).slice(0,10);
+  const m=Object.values(DB.insumos).filter(i=>i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)).slice(0,10);
   if(!m.length){dd.classList.remove('open');return;}
-  dd.innerHTML=m.map(i=>`<div class="ing-opt" onclick="selectPurIng('${i.code}')"><span>${i.name}</span><span class="ing-code">${i.code}</span></div>`).join('');
+  dd.innerHTML=m.map(i=>`<div class="ing-opt" onclick="selectPurIng('${i.code}')"><span>${escH(i.name)}</span><span class="ing-code">${i.code}</span></div>`).join('');
   dd.classList.add('open');
 };
 window.selectPurIng = code => {
-  PUR_CODE=code; const ing=DB.ingredients[code];
-  document.getElementById('pur-q').value=ing.name; document.getElementById('pur-code').value=code; document.getElementById('pur-prov').value=ing.prov||'';
-  document.getElementById('pur-dd').classList.remove('open'); calcPurCPG();
+  PUR_CODE=code; const ing=DB.insumos[code];
+  document.getElementById('pur-q').value=ing.name;
+  document.getElementById('pur-code').value=code;
+  document.getElementById('pur-prov').value=ing.prov||'';
+  document.getElementById('pur-dd').classList.remove('open');
+  calcPurCPG();
 };
 window.calcPurCPG = () => {
   const qty=Number(document.getElementById('pur-qty').value)||0, price=Number(document.getElementById('pur-price').value)||0;
   document.getElementById('pur-cpg').value=qty>0?fmtG(price/qty)+' '+cur()+'/g':'—';
 };
-window.submitPurchase = async () => {
+window.submitCompra = async () => {
   if(!PUR_CODE){toast('Selecciona un insumo',true);return;}
   const qty=Number(document.getElementById('pur-qty').value)||0, price=Number(document.getElementById('pur-price').value)||0;
   if(qty<=0){toast('Cantidad mayor a 0',true);return;}
-  const ing=DB.ingredients[PUR_CODE];
+  const ing=DB.insumos[PUR_CODE];
   const entry={id:'',ingCode:PUR_CODE,ingName:ing?ing.name:PUR_CODE,prov:document.getElementById('pur-prov').value,date:document.getElementById('pur-date').value||new Date().toISOString().split('T')[0],qty,pricePaid:price,costPerG:qty>0?price/qty:0,notes:document.getElementById('pur-notes').value,savedBy:CUR?.name||''};
-  const newRef=await push(ref(db,'inventory'), entry);
-  entry.id=newRef.key; DB.inventory[newRef.key]=entry;
-  if(document.getElementById('pur-upd').checked && ing) {
-    await fbUpdate(`ingredients/${PUR_CODE}`,{cmaster:price,um:qty});
+  const newRef=await push(ref(db,'compras'),entry);
+  entry.id=newRef.key; DB.compras[newRef.key]=entry;
+  if(document.getElementById('pur-upd').checked&&ing){
+    await fbUpdate(`insumos/${PUR_CODE}`,{cmaster:price,um:qty});
     ing.cmaster=price; ing.um=qty;
   }
-  closeModal('modal-purchase');
-  PUR_CODE=null;
-  ['pur-q','pur-code','pur-prov','pur-notes'].forEach(id=>{document.getElementById(id).value='';});
-  document.getElementById('pur-qty').value='1000'; document.getElementById('pur-price').value='0'; document.getElementById('pur-cpg').value='';
-  renderInventory(); renderSidebar(); renderDashboard(); toast('✓ Compra registrada');
+  closeModal('modal-new-compra'); PUR_CODE=null;
+  ['pur-q','pur-code','pur-prov','pur-notes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const qEl=document.getElementById('pur-qty'); if(qEl) qEl.value='1000';
+  const pEl=document.getElementById('pur-price'); if(pEl) pEl.value='0';
+  const cEl=document.getElementById('pur-cpg'); if(cEl) cEl.value='';
+  renderCompras(); renderDashboard(); renderInvInsumos(); toast('✓ Compra registrada');
 };
 
-// ════════════════════════════════════════════════════════════
-// ADMIN
-// ════════════════════════════════════════════════════════════
-window.loadAdminUsers = async () => {
-  if(!CUR?.isAdmin) return;
-  const snap = await get(ref(db,'users'));
-  const users = snap.val() || {};
-  renderAdminPanel(Object.values(users));
-};
-
-function renderAdminPanel(users) {
-  const pending = users.filter(u=>u.status==='pending');
-  const rest    = users.filter(u=>u.status!=='pending');
-  document.getElementById('pending-count').textContent = pending.length+' pendiente(s)';
-  document.getElementById('users-count').textContent   = rest.length+' usuario(s)';
-
-  document.getElementById('pending-list').innerHTML = pending.length
-    ? pending.map(u=>`<div class="user-row"><div><div class="ur-name">${escH(u.name)}</div><div class="ur-email">${escH(u.email)}</div></div><div><span class="status-pill sp-pending">● Pendiente</span></div><div style="font-size:11px;color:var(--text-dim)">${escH(u.requestDate||'')}</div><div></div><div style="display:flex;gap:6px;"><button class="btn btn-green btn-sm" onclick="approveUser('${escH(u.uid)}','${escH(u.email)}')">✓ Aprobar</button><button class="btn btn-danger btn-sm" onclick="rejectUser('${escH(u.uid)}')">✕ Rechazar</button></div></div>`).join('')
-    : '<div style="text-align:center;padding:20px;color:var(--text-dim)">✓ No hay solicitudes pendientes</div>';
-
-  document.getElementById('all-users-list').innerHTML = rest.length
-    ? rest.map(u=>{const sc=u.status==='approved'?'sp-approved':u.status==='rejected'?'sp-rejected':'sp-pending'; const sl=u.status==='approved'?'✓ Aprobado':u.status==='rejected'?'✕ Rechazado':'● Pendiente';
-      return `<div class="user-row"><div><div class="ur-name">${escH(u.name)}${u.role==='admin'?' <span class="admin-badge">Admin</span>':''}</div><div class="ur-email">${escH(u.email)}</div></div><div><span class="status-pill ${sc}">${sl}</span></div><div style="font-size:11px;color:var(--text-dim)">${escH(u.approvedDate||u.requestDate||'')}</div><div style="font-size:11px;color:var(--text-dim)">${escH(u.lastLogin||'—')}</div><div style="display:flex;gap:6px;">${u.status!=='approved'?`<button class="btn btn-green btn-sm" onclick="approveUser('${escH(u.uid)}','${escH(u.email)}')">✓</button>`:''}${u.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="rejectUser('${escH(u.uid)}')">✕</button>`:''}<button class="btn btn-secondary btn-sm" onclick="removeUser('${escH(u.uid)}')">🗑</button></div></div>`;
-    }).join('')
-    : '<div style="text-align:center;padding:20px;color:var(--text-dim)">Sin usuarios registrados</div>';
+// ── Nueva Orden de Producción ──
+function populateProdRecetaSelect() {
+  const sel=document.getElementById('prod-receta'); if(!sel) return;
+  sel.innerHTML='<option value="">Seleccionar receta…</option>'+
+    Object.values(DB.recetas).map(r=>`<option value="${r.id}">${escH(r.name)}</option>`).join('');
 }
-
-window.approveUser = async (uid, email) => {
-  if(!confirm(`¿Aprobar acceso a ${email}?`)) return;
-  await fbUpdate(`users/${uid}`,{status:'approved',approvedDate:new Date().toISOString(),approvedBy:CUR?.email||''});
-  loadAdminUsers(); toast('✓ Usuario aprobado');
-};
-window.rejectUser = async uid => {
-  if(!confirm('¿Rechazar esta solicitud?')) return;
-  await fbUpdate(`users/${uid}`,{status:'rejected'});
-  loadAdminUsers(); toast('Solicitud rechazada');
-};
-window.removeUser = async uid => {
-  if(!confirm('¿Eliminar este usuario del sistema?')) return;
-  await fbRemove(`users/${uid}`);
-  loadAdminUsers(); toast('Usuario eliminado');
+window.submitProduccion = async () => {
+  const recetaId=document.getElementById('prod-receta').value;
+  if(!recetaId){toast('Selecciona una receta',true);return;}
+  const receta=DB.recetas[recetaId];
+  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,estado:document.getElementById('prod-estado').value||'pendiente',notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
+  const newRef=await push(ref(db,'produccion'),entry);
+  entry.id=newRef.key; DB.produccion[newRef.key]=entry;
+  closeModal('modal-new-prod');
+  ['prod-lotes','prod-operario','prod-notas'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=id==='prod-lotes'?'1':'';});
+  renderProduccion(); renderDashboard(); renderInvProductos(); toast('✓ Orden de producción creada');
 };
 
-// ════════════════════════════════════════════════════════════
+// ── Nueva Venta ──
+window.calcVentaTotal = () => {
+  const qty=Number(document.getElementById('ven-qty').value)||0, precio=Number(document.getElementById('ven-precio').value)||0;
+  const el=document.getElementById('ven-total'); if(el) el.value=fmt(qty*precio);
+};
+window.submitVenta = async () => {
+  const producto=document.getElementById('ven-producto').value.trim();
+  if(!producto){toast('Ingresa el producto',true);return;}
+  const qty=Number(document.getElementById('ven-qty').value)||1;
+  const precioUnit=Number(document.getElementById('ven-precio').value)||0;
+  const entry={id:'',producto,qty,precioUnit,total:qty*precioUnit,fecha:document.getElementById('ven-fecha').value||new Date().toISOString().split('T')[0],cliente:document.getElementById('ven-cliente').value,estado:document.getElementById('ven-estado').value||'pendiente',notas:document.getElementById('ven-notas').value,savedBy:CUR?.name||''};
+  const newRef=await push(ref(db,'ventas'),entry);
+  entry.id=newRef.key; DB.ventas[newRef.key]=entry;
+  closeModal('modal-new-venta');
+  ['ven-producto','ven-cliente','ven-notas','ven-total'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const qEl=document.getElementById('ven-qty'); if(qEl) qEl.value='1';
+  const pEl=document.getElementById('ven-precio'); if(pEl) pEl.value='0';
+  renderVentas(); renderDashboard(); toast('✓ Venta registrada');
+};
+
+// ════════════════════════════════════════════════════════
 // UI HELPERS
-// ════════════════════════════════════════════════════════════
-window.toggleDD   = () => document.getElementById('user-dd').classList.toggle('open');
-window.closeDD    = () => document.getElementById('user-dd').classList.remove('open');
-window.stab = (name, btn) => {
-  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active'); document.getElementById('stab-'+name).classList.add('active');
+// ════════════════════════════════════════════════════════
+window.openModal = id => {
+  document.getElementById(id).classList.add('open');
+  // Pre-populate selects when opening certain modals
+  if(id==='modal-new-prod') {
+    populateProdRecetaSelect();
+    const fd=document.getElementById('prod-fecha'); if(fd) fd.value=new Date().toISOString().split('T')[0];
+  }
+  if(id==='modal-new-compra') {
+    const pd=document.getElementById('pur-date'); if(pd) pd.value=new Date().toISOString().split('T')[0];
+  }
+  if(id==='modal-new-venta') {
+    const vd=document.getElementById('ven-fecha'); if(vd) vd.value=new Date().toISOString().split('T')[0];
+  }
 };
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+window.toggleDD = () => document.getElementById('user-dd').classList.toggle('open');
+window.closeDD  = () => document.getElementById('user-dd').classList.remove('open');
+window.stab = (name,btn) => {
+  const parent=btn.closest('.stabs').nextElementSibling;
+  btn.closest('.stabs').querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // find all stab-contents that are siblings
+  let el=btn.closest('.stabs').nextElementSibling;
+  while(el && el.classList.contains('stab-content')){el.classList.remove('active'); el=el.nextElementSibling;}
+  const target=document.getElementById('stab-'+name); if(target) target.classList.add('active');
+};
+window.showScreen = showScreen;
 
 document.addEventListener('click', e => {
   if(!e.target.closest('#user-pill')) closeDD();
   if(!e.target.closest('.ing-wrap')) document.querySelectorAll('.ing-dd').forEach(d=>d.classList.remove('open'));
 });
 
-window.showScreen = showScreen;
-
 function toast(msg, isErr) {
   const t=document.getElementById('toast'); t.textContent=msg;
   t.className='show'+(isErr?' err':''); clearTimeout(t._t);
   t._t=setTimeout(()=>{t.className='';},3000);
 }
-window.toast = toast;
-
-// Purchase date default
-document.getElementById('pur-date').value = new Date().toISOString().split('T')[0];
+window.toast=toast;
 
 </script>
 </body>
 </html>
+

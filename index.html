@@ -794,7 +794,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 <div id="toast"></div>
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut as fbSignOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, set, get, push, remove, onValue, off, update }
                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
@@ -841,6 +841,7 @@ let CUR = null;
 let CUR_RECIPE_ID = null;
 let AI_CODE = null, PUR_CODE = null;
 let RT_LISTENERS = [];
+let popupInProgress = false;
 
 // ════════════════════════════════════════════════════════
 // HELPERS
@@ -925,8 +926,21 @@ function showScreen(id) {
 }
 
 window.signInWithGoogle = async () => {
-  try { await signInWithRedirect(auth, new GoogleAuthProvider()); }
-  catch(e) { toast('Error al iniciar sesión: '+e.message, true); }
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  popupInProgress = true;
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    popupInProgress = false;
+    if (e?.code === 'auth/popup-blocked') {
+      toast('Los popups están bloqueados. Permite popups para este sitio e intenta de nuevo.', true);
+    } else if (e?.code === 'auth/popup-closed-by-user' || e?.code === 'auth/cancelled-popup-request') {
+      // user closed the popup — silently stay on sign-in screen
+    } else {
+      toast('Error al iniciar sesión: ' + e.message, true);
+    }
+  }
 };
 
 window.signOut = async () => {
@@ -942,26 +956,15 @@ window.switchAccount = async () => {
   showScreen('screen-signin');
 };
 
-// ── Call getRedirectResult ONCE before setting up the listener.
-//    Wrap in a promise so onAuthStateChanged can await it and
-//    avoid acting on an incomplete auth state during the redirect.
-const redirectDone = getRedirectResult(auth).then(() => true).catch(e => {
-  if (e?.code && e.code !== 'auth/null-credential' && e.code !== 'auth/no-auth-event') {
-    toast('Error al iniciar sesión: ' + e.message, true);
-  }
-  return true; // always resolve — errors are non-fatal here
-});
-
 onAuthStateChanged(auth, async user => {
-  // Wait for redirect processing to finish before evaluating auth state.
-  // This prevents acting on a transient user=null during the redirect flow.
-  await redirectDone;
-
   const ls = document.getElementById('loading-screen');
   if (!user) {
     ls.classList.add('out'); setTimeout(()=>ls.style.display='none',500);
-    showScreen('screen-signin'); return;
+    // Only show sign-in screen if we are not in the middle of a popup auth flow
+    if (!popupInProgress) showScreen('screen-signin');
+    return;
   }
+  popupInProgress = false;
 
   const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   let name = user.displayName || user.email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());

@@ -17,6 +17,18 @@ const FIREBASE_CONFIG = {
   appId:             "1:922536272827:web:e6dd8802df69f9ebf6da9e"
 };
 const ADMIN_EMAIL = "joffreadumf@gmail.com";
+
+/* ══════════════════════════════════════════════════════════
+   🔥 FIREBASE REALTIME DATABASE — SECURITY RULES
+   Paste these in Firebase Console → Realtime Database → Rules
+   ══════════════════════════════════════════════════════════
+{
+  "rules": {
+    ".read":  "auth != null",
+    ".write": "auth != null"
+  }
+}
+   ════════════════════════════════════════════════════════ */
 </script>
 
 <style>
@@ -781,7 +793,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 <div id="toast"></div>
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut as fbSignOut, onAuthStateChanged }
                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, set, get, push, remove, onValue, off, update }
                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
@@ -912,7 +924,7 @@ function showScreen(id) {
 }
 
 window.signInWithGoogle = async () => {
-  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  try { await signInWithRedirect(auth, new GoogleAuthProvider()); }
   catch(e) { toast('Error al iniciar sesión: '+e.message, true); }
 };
 
@@ -922,6 +934,11 @@ window.signOut = async () => {
   await fbSignOut(auth);
   showScreen('screen-signin');
 };
+
+// Handle redirect result first (runs once after Google redirect)
+getRedirectResult(auth).catch(e => {
+  if (e?.code !== 'auth/null-credential') toast('Error al iniciar sesión: ' + e.message, true);
+});
 
 onAuthStateChanged(auth, async user => {
   const ls = document.getElementById('loading-screen');

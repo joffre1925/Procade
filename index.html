@@ -1129,9 +1129,9 @@ function renderSidebar(tab) {
   } else if (tab==='insumos') {
     const cats=[...new Set(Object.values(DB.insumos).map(i=>i.cat))].filter(Boolean).sort();
     html=`<div class="sb-label">Insumos</div>
-      <div class="sb-item active">📦 Todos <span class="badge">${Object.keys(DB.insumos).length}</span></div>
+      <div class="sb-item${!insumoFilter?' active':''}" onclick="filterInsumosByCat('')">📦 Todos <span class="badge">${Object.keys(DB.insumos).length}</span></div>
       <div class="sb-label" style="margin-top:12px">Categorías</div>
-      ${cats.map(c=>{const n=Object.values(DB.insumos).filter(i=>i.cat===c).length;return`<div class="sb-item" onclick="filterInsumosByCat('${c}')">${c} <span class="badge">${n}</span></div>`;}).join('')}`;
+      ${cats.map(c=>{const n=Object.values(DB.insumos).filter(i=>i.cat===c).length;return`<div class="sb-item${insumoFilter===c?' active':''}" onclick="filterInsumosByCat('${c}')">${c} <span class="badge">${n}</span></div>`;}).join('')}`;
   } else if (tab==='produccion') {
     const all=Object.values(DB.produccion), byS=s=>all.filter(p=>p.estado===s).length;
     html=`<div class="sb-label">Por Estado</div>
@@ -1352,7 +1352,7 @@ window.updateRecipePrecio = async (id,val) => {
 // RENDER: INSUMOS
 // ════════════════════════════════════════════════════════
 let insumoFilter='';
-window.filterInsumosByCat=cat=>{insumoFilter=cat; renderInsumosTable();};
+window.filterInsumosByCat=cat=>{insumoFilter=cat; renderInsumosTable(); renderSidebar();};
 
 function renderInsumosTable() {
   const q=(document.getElementById('ing-search')||{value:''}).value.toLowerCase();

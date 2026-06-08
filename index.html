@@ -842,6 +842,7 @@ let CUR_RECIPE_ID = null;
 let AI_CODE = null, PUR_CODE = null;
 let RT_LISTENERS = [];
 let popupInProgress = false;
+let CUR_TAB = 'dashboard';
 
 // ════════════════════════════════════════════════════════
 // HELPERS
@@ -897,11 +898,11 @@ async function fbRemove(path)       { savePending(); try { await remove(ref(db,p
 // ════════════════════════════════════════════════════════
 function subscribeAll() {
   const paths = {
-    insumos:    () => { renderInsumosTable(); renderSidebar(); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
-    recetas:    () => { renderRecipeGrid(); renderSidebar(); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
-    produccion: () => { renderProduccion(); renderDashboard(); renderSidebar(); renderInvProductos(); },
-    compras:    () => { renderCompras(); renderDashboard(); renderSidebar(); renderInvInsumos(); },
-    ventas:     () => { renderVentas(); renderDashboard(); renderSidebar(); },
+    insumos:    () => { renderInsumosTable(); renderSidebar(CUR_TAB); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
+    recetas:    () => { renderRecipeGrid(); renderSidebar(CUR_TAB); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
+    produccion: () => { renderProduccion(); renderDashboard(); renderSidebar(CUR_TAB); renderInvProductos(); },
+    compras:    () => { renderCompras(); renderDashboard(); renderSidebar(CUR_TAB); renderInvInsumos(); },
+    ventas:     () => { renderVentas(); renderDashboard(); renderSidebar(CUR_TAB); },
     usuarios:   () => { if(CUR?.role==='admin') loadAdminUsers(); },
     config:     () => { applyConfig(); },
   };
@@ -1096,6 +1097,7 @@ function populateSettingsInputs(){
 // ════════════════════════════════════════════════════════
 window.switchTab = tab => {
   if (!canAccess(tab) && tab !== 'settings') { toast('Sin permiso para este módulo', true); return; }
+  CUR_TAB = tab;
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   const nb=document.getElementById('nav-'+tab); if(nb) nb.classList.add('active');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1352,7 +1354,7 @@ window.updateRecipePrecio = async (id,val) => {
 // RENDER: INSUMOS
 // ════════════════════════════════════════════════════════
 let insumoFilter='';
-window.filterInsumosByCat=cat=>{insumoFilter=cat; renderInsumosTable(); renderSidebar();};
+window.filterInsumosByCat=cat=>{insumoFilter=cat; renderInsumosTable(); renderSidebar(CUR_TAB);};
 
 function renderInsumosTable() {
   const q=(document.getElementById('ing-search')||{value:''}).value.toLowerCase();

@@ -475,10 +475,11 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <button class="btn btn-danger btn-sm" id="btn-delete-recipe" onclick="deleteCurrentRecipe()">🗑 Eliminar</button>
       </div>
       <div class="rf-grid" id="det-fields"></div>
-      <div class="cost-box">
+      <div class="cost-box" style="grid-template-columns:repeat(4,1fr);">
         <div><div class="cb-lbl">Costo MP / Unidad</div><div class="cb-val accent" id="cb-unit">—</div></div>
-        <div><div class="cb-lbl">Inversión Total</div><div class="cb-val" id="cb-total">—</div></div>
+        <div><div class="cb-lbl">Inversión Total Lote</div><div class="cb-val" id="cb-total">—</div></div>
         <div><div class="cb-lbl">Margen Estimado</div><div class="cb-val green" id="cb-margin">—</div></div>
+        <div><div class="cb-lbl">Rendimiento / Lote</div><div class="cb-val" id="cb-yield">—</div></div>
       </div>
       <div class="panel">
         <div class="panel-hdr">
@@ -486,7 +487,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
           <button class="btn btn-ghost btn-sm" id="btn-add-ing" onclick="openModal('modal-add-ing')">＋ Agregar Insumo</button>
         </div>
         <div style="padding:0"><table>
-          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant.(g)</th><th>Costo Unit.</th><th>Total Orden</th><th></th></tr></thead>
+          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant.(g)</th><th>Costo Unit.</th><th>Total Lote</th><th></th></tr></thead>
           <tbody id="det-ings"></tbody>
           <tfoot><tr>
             <td colspan="5" style="text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);padding:10px 11px;text-transform:uppercase;">Total</td>
@@ -666,7 +667,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   <div class="modal-title">Nueva Receta</div>
   <div class="form-grid">
     <div class="ff full"><label>Nombre</label><input id="nr-name" placeholder="ej. Tikka Massala"></div>
-    <div class="ff"><label>Orden de Producción</label><input id="nr-orden" type="number" value="10"></div>
+    <div class="ff"><label>Cantidad por Lote</label><input id="nr-orden" type="number" value="10"></div>
     <div class="ff"><label>Tamaño Envase (ml/g)</label><input id="nr-envase" type="number" value="370"></div>
     <div class="ff"><label>Precio de Venta</label><input id="nr-precio" type="number" step="0.01" value="0"></div>
     <div class="ff"><label>Categoría</label><select id="nr-cat"><option>Salsas</option><option>Proteinas</option><option>Condimentos</option><option>Otro</option></select></div>
@@ -1311,7 +1312,9 @@ function renderRecipeGrid() {
   if(!recs.length){grid.innerHTML='<div style="text-align:center;padding:48px;color:var(--text-dim)">🍳<br><br>No se encontraron recetas</div>';return;}
   grid.innerHTML=recs.map(r=>{
     const c=calcCosts(r), mg=r.precio>0?((r.precio-c.unit)/r.precio*100).toFixed(1)+'%':'—';
-    return `<div class="recipe-card" onclick="openRecipe('${r.id}')"><div class="rc-name">${escH(r.name)}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div><div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Orden</div><div class="val">${r.orden} lotes</div></div><div class="rc-stat"><div class="lbl">Inversión</div><div class="val">${fmt(c.total)}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div></div>`;
+    const totalPesoCard=Object.values(r.ingredients||{}).reduce((s,ri)=>s+Number(ri.qty||0),0);
+    const rendCard=(r.envase&&r.envase>0)?(totalPesoCard/r.envase).toFixed(1)+'un':'—';
+    return `<div class="recipe-card" onclick="openRecipe('${r.id}')"><div class="rc-name">${escH(r.name)}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div><div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Cant. x Lote</div><div class="val">${r.orden}</div></div><div class="rc-stat"><div class="lbl">Rendimiento</div><div class="val">${rendCard}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div></div>`;
   }).join('');
 }
 
@@ -1345,8 +1348,8 @@ function renderRecipeDetail() {
   const ro=!canWrite();
   document.getElementById('det-fields').innerHTML=`
     <div class="rf-field"><label>Nombre</label><input value="${escH(r.name)}" ${ro?'readonly':''} onchange="updateRecipeField('name',this.value)"></div>
-    <div class="rf-field"><label>Orden de Producción</label><input type="number" value="${r.orden}" ${ro?'readonly':''} onchange="updateRecipeField('orden',Number(this.value))"></div>
-    <div class="rf-field"><label>Tamaño Envase (ml/g)</label><input type="number" value="${r.envase}" ${ro?'readonly':''} onchange="updateRecipeField('envase',Number(this.value))"></div>
+    <div class="rf-field"><label>Cantidad por Lote (unidades)</label><input type="number" value="${r.orden}" ${ro?'readonly':''} onchange="updateRecipeField('orden',Number(this.value))"></div>
+    <div class="rf-field"><label>Tamaño de Envase (ml/g)</label><input type="number" value="${r.envase}" ${ro?'readonly':''} onchange="updateRecipeField('envase',Number(this.value))"></div>
     <div class="rf-field"><label>Precio de Venta</label><input type="number" step="0.01" value="${r.precio}" ${ro?'readonly':''} onchange="updateRecipeField('precio',Number(this.value))"></div>
     <div class="rf-field"><label>Categoría</label><select ${ro?'disabled':''} onchange="updateRecipeField('cat',this.value)">${['Salsas','Proteinas','Condimentos','Otro'].map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
   refreshDetail();
@@ -1372,6 +1375,11 @@ function refreshDetail() {
   }).join('');
   document.getElementById('det-tot-u').textContent=fmt(tu);
   document.getElementById('det-tot-p').textContent=fmt(tp);
+  // Rendimiento: peso total fórmula / tamaño envase = unidades por lote
+  const totalPeso=Object.values(r.ingredients||{}).reduce((s,ri)=>s+Number(ri.qty||0),0);
+  const rendimiento=(r.envase&&r.envase>0)?(totalPeso/r.envase):0;
+  const yEl=document.getElementById('cb-yield');
+  if(yEl) yEl.textContent=rendimiento>0?rendimiento.toFixed(2)+' un × '+r.envase+'g':'—';
 }
 
 window.updateRecipeField = async (field,val) => {

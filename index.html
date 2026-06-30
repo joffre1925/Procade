@@ -487,7 +487,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
           <button class="btn btn-ghost btn-sm" id="btn-add-ing" onclick="openModal('modal-add-ing')">＋ Agregar Insumo</button>
         </div>
         <div style="padding:0"><table>
-          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant.(g)</th><th>Costo Unit.</th><th>Total Lote</th><th></th></tr></thead>
+          <thead><tr><th>Código</th><th>Insumo</th><th>Categoría</th><th>Costo/g</th><th>Cant./Lote (g)</th><th>Costo Unit.</th><th>Total Lote</th><th></th></tr></thead>
           <tbody id="det-ings"></tbody>
           <tfoot><tr>
             <td colspan="5" style="text-align:right;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-dim);padding:10px 11px;text-transform:uppercase;">Total</td>
@@ -883,9 +883,10 @@ const getCPG    = code => { const i=DB.insumos[code]; return i ? insumoCPG(i) : 
 const escH  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function calcCosts(r) {
-  let cu = 0;
-  Object.values(r.ingredients||{}).forEach(ri => { cu += getCPG(ri.code) * ri.qty; });
-  return { unit: cu, total: cu * (r.orden||0) };
+  let loteCost = 0;
+  Object.values(r.ingredients||{}).forEach(ri => { loteCost += getCPG(ri.code) * ri.qty; });
+  const orden = r.orden || 1;
+  return { unit: loteCost / orden, total: loteCost };
 }
 
 function catTag(cat) {
@@ -1364,8 +1365,11 @@ function refreshDetail() {
   const cm=document.getElementById('cb-margin'); cm.textContent=mg;
   cm.className='cb-val '+(r.precio>c.unit?'green':(r.precio===0?'':'red'));
   let tu=0,tp=0;
+  const orden=r.orden||1;
   document.getElementById('det-ings').innerHTML=Object.entries(r.ingredients||{}).map(([key,ri])=>{
-    const ing=DB.insumos[ri.code],cpg=ing?insumoCPG(ing):0,cu=cpg*ri.qty,ct=cu*r.orden;
+    const ing=DB.insumos[ri.code],cpg=ing?insumoCPG(ing):0;
+    const ct=cpg*ri.qty;        // costo total del ingrediente por lote
+    const cu=ct/orden;          // costo por unidad producida
     tu+=cu; tp+=ct;
     const qtyCell=canWrite()
       ?`<input class="editable mono" type="number" value="${ri.qty}" step="0.1" min="0" onchange="updateIngQty('${key}',Number(this.value))">`

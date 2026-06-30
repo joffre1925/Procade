@@ -521,11 +521,11 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
       </div>
       <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card"><div class="sc-label">Total Órdenes</div><div class="sc-val accent" id="prod-st-total">0</div><div class="sc-sub">registradas</div></div>
-        <div class="stat-card"><div class="sc-label">En Proceso</div><div class="sc-val" id="prod-st-proceso">0</div><div class="sc-sub">activas</div></div>
-        <div class="stat-card"><div class="sc-label">Completadas</div><div class="sc-val green" id="prod-st-completadas">0</div><div class="sc-sub">finalizadas</div></div>
+        <div class="stat-card"><div class="sc-label">Pendientes</div><div class="sc-val" id="prod-st-proceso">0</div><div class="sc-sub">por confirmar</div></div>
+        <div class="stat-card"><div class="sc-label">Confirmadas</div><div class="sc-val green" id="prod-st-completadas">0</div><div class="sc-sub">finalizadas</div></div>
       </div>
       <div class="panel"><div style="padding:0"><table>
-        <thead><tr><th>Fecha</th><th>Receta</th><th>Lotes</th><th>Operario</th><th>Estado</th><th>Notas</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Receta</th><th>Tipo</th><th>Lotes Plan.</th><th>Lotes Real</th><th>Operario</th><th>Estado</th><th>Notas</th><th></th></tr></thead>
         <tbody id="prod-table"></tbody>
       </table></div></div>
     </div>
@@ -545,7 +545,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <div class="stat-card"><div class="sc-label">Insumos Distintos</div><div class="sc-val" id="cmp-st-items">0</div><div class="sc-sub">con stock</div></div>
       </div>
       <div class="panel"><div style="padding:0"><table>
-        <thead><tr><th>Fecha</th><th>Insumo</th><th>Proveedor</th><th>Cantidad</th><th>Precio Pagado</th><th>Costo/g</th><th>Notas</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Código</th><th>Nombre</th><th>Categoría</th><th>Proveedor</th><th>Empaque</th><th>Costo Master</th><th>UM</th><th>Costo/g</th><th></th></tr></thead>
         <tbody id="compras-table"></tbody>
       </table></div></div>
     </div>
@@ -720,23 +720,25 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 <div class="modal-overlay" id="modal-new-compra"><div class="modal">
   <div class="modal-title">🛒 Registrar Compra</div>
   <div class="form-grid">
-    <div class="ff full"><label>Insumo</label>
+    <div class="ff full"><label>Buscar Insumo Existente (opcional)</label>
       <div class="ing-wrap">
-        <input id="pur-q" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;" placeholder="Buscar insumo…" oninput="filterPurDD()" onfocus="filterPurDD()">
+        <input id="pur-q" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;" placeholder="Escribe para pre-llenar campos…" oninput="filterPurDD()" onfocus="filterPurDD()">
         <div class="ing-dd" id="pur-dd"></div>
       </div>
     </div>
-    <div class="ff"><label>Código</label><input id="pur-code" readonly style="color:var(--text-dim)"></div>
     <div class="ff"><label>Fecha de Compra</label><input id="pur-date" type="date"></div>
-    <div class="ff"><label>Proveedor</label><input id="pur-prov" placeholder="Makro, Mitu…"></div>
-    <div class="ff"><label>Cantidad (g / unidades)</label><input id="pur-qty" type="number" step="0.1" value="1000" min="0" oninput="calcPurCPG()"></div>
-    <div class="ff"><label>Precio Total Pagado</label><input id="pur-price" type="number" step="0.01" value="0" min="0" oninput="calcPurCPG()"></div>
-    <div class="ff full"><label>Costo/g (calculado)</label><input id="pur-cpg" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;width:100%;outline:none;"></div>
-    <div class="ff full"><label>Notas (opcional)</label><textarea id="pur-notes" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea></div>
-    <div class="ff full">
-      <div class="toggle-row"><input type="checkbox" id="pur-upd" checked><label for="pur-upd">Actualizar el Costo Master del insumo con esta compra</label></div>
-      <div class="form-hint">Los costos de recetas se recalcularán automáticamente.</div>
+    <div class="ff"><label>Código</label><input id="pur-code" placeholder="ej. Tomate001"></div>
+    <div class="ff"><label>Nombre</label><input id="pur-name" placeholder="ej. Tomate Cherry"></div>
+    <div class="ff"><label>Categoría</label>
+      <select id="pur-cat" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
+        <option>Vegetales</option><option>Proteinas</option><option>Condimentos</option><option>Salsas</option><option>Aditivos</option><option>Empaque</option><option>Endulzantes</option><option>Semiprocesado</option>
+      </select>
     </div>
+    <div class="ff"><label>Proveedor</label><input id="pur-prov" placeholder="Makro, Mitu…"></div>
+    <div class="ff"><label>Empaque (descripción)</label><input id="pur-desc" placeholder="ej. Gramos, Unidad, Bolsa 1kg"></div>
+    <div class="ff"><label>Costo Master (precio total)</label><input id="pur-cmaster" type="number" step="0.01" placeholder="0.00" oninput="calcPurCPG()"></div>
+    <div class="ff"><label>UM (g o unidades en el empaque)</label><input id="pur-um" type="number" placeholder="1000" oninput="calcPurCPG()"></div>
+    <div class="ff full"><label>Costo/g (calculado automáticamente)</label><input id="pur-cpg" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;width:100%;outline:none;"></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-secondary" onclick="closeModal('modal-new-compra')">Cancelar</button>
@@ -749,21 +751,41 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   <div class="modal-title">🏭 Nueva Orden de Producción</div>
   <div class="form-grid">
     <div class="ff full"><label>Receta</label><select id="prod-receta" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"><option value="">Seleccionar…</option></select></div>
-    <div class="ff"><label>Cantidad de Lotes</label><input id="prod-lotes" type="number" value="1" min="1"></div>
+    <div class="ff"><label>Cantidad de Lotes Planeados</label><input id="prod-lotes" type="number" value="1" min="1"></div>
     <div class="ff"><label>Fecha</label><input id="prod-fecha" type="date"></div>
     <div class="ff"><label>Operario Responsable</label><input id="prod-operario" placeholder="Nombre del operario"></div>
-    <div class="ff"><label>Estado</label>
-      <select id="prod-estado" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
-        <option value="pendiente">Pendiente</option>
-        <option value="en proceso">En Proceso</option>
-        <option value="completado">Completado</option>
+    <div class="ff"><label>Tipo de Producción</label>
+      <select id="prod-tipo" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
+        <option value="normal">Normal (Producto Terminado)</option>
+        <option value="semiprocesado">Semiprocesado (va a Insumos)</option>
       </select>
     </div>
     <div class="ff full"><label>Notas</label><textarea id="prod-notas" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-secondary" onclick="closeModal('modal-new-prod')">Cancelar</button>
-    <button class="btn btn-primary" onclick="submitProduccion()">💾 Guardar Orden</button>
+    <button class="btn btn-primary" onclick="submitProduccion()">💾 Crear Orden</button>
+  </div>
+</div></div>
+
+<!-- ── MODAL: CONFIRMAR PRODUCCIÓN ── -->
+<div class="modal-overlay" id="modal-confirm-prod"><div class="modal">
+  <div class="modal-title">✅ Confirmar Producción</div>
+  <div id="confirm-prod-info" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--text-muted);"></div>
+  <div class="form-grid">
+    <div class="ff full"><label>Cantidad Real Producida (lotes)</label>
+      <input id="confirm-prod-lotes" type="number" step="0.1" min="0" placeholder="Cantidad real producida">
+    </div>
+    <div class="ff full"><label>Notas de Confirmación (opcional)</label>
+      <textarea id="confirm-prod-notas" rows="2" style="resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"></textarea>
+    </div>
+  </div>
+  <div style="background:rgba(106,177,135,.07);border:1px solid rgba(106,177,135,.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text-muted);margin-top:12px;">
+    Al confirmar: se descuentan los insumos usados y se agrega al inventario.
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeModal('modal-confirm-prod')">Cancelar</button>
+    <button class="btn btn-primary" onclick="submitConfirmProd()">✅ Confirmar Producción</button>
   </div>
 </div></div>
 
@@ -771,8 +793,12 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 <div class="modal-overlay" id="modal-new-venta"><div class="modal">
   <div class="modal-title">💰 Nueva Venta</div>
   <div class="form-grid">
-    <div class="ff full"><label>Producto</label><input id="ven-producto" placeholder="ej. Tikka Massala 370ml"></div>
-    <div class="ff"><label>Cantidad (unidades)</label><input id="ven-qty" type="number" value="1" min="1" oninput="calcVentaTotal()"></div>
+    <div class="ff full"><label>Producto</label>
+      <select id="ven-receta-id" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;" onchange="onVentaProductoChange()">
+        <option value="">Seleccionar producto…</option>
+      </select>
+    </div>
+    <div class="ff"><label>Cantidad (lotes)</label><input id="ven-qty" type="number" value="1" min="1" oninput="calcVentaTotal()"></div>
     <div class="ff"><label>Precio Unitario</label><input id="ven-precio" type="number" step="0.01" value="0" oninput="calcVentaTotal()"></div>
     <div class="ff full"><label>Total (calculado)</label><input id="ven-total" readonly style="color:var(--accent);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;width:100%;outline:none;"></div>
     <div class="ff"><label>Fecha</label><input id="ven-fecha" type="date"></div>
@@ -839,6 +865,7 @@ function roleBadge(role) {
 let DB = { insumos:{}, recetas:{}, produccion:{}, compras:{}, ventas:{}, usuarios:{}, config:{} };
 let CUR = null;
 let CUR_RECIPE_ID = null;
+let CUR_CONFIRM_PROD_ID = null;
 let AI_CODE = null, PUR_CODE = null;
 let RT_LISTENERS = [];
 let popupInProgress = false;
@@ -874,8 +901,35 @@ const getR = () => DB.recetas[CUR_RECIPE_ID] || null;
 
 function getStockInsumo(code) {
   let t = 0;
-  Object.values(DB.compras).forEach(c => { if (c.ingCode === code) t += Number(c.qty||0); });
-  return t;
+  // Sumar desde compras (compatibilidad: campo um o qty)
+  Object.values(DB.compras).forEach(c => { if(c.ingCode === code) t += Number(c.um || c.qty || 0); });
+  // Descontar uso en producciones confirmadas (tipo normal)
+  Object.values(DB.produccion).forEach(p => {
+    if(p.estado === 'completado' && p.tipo !== 'semiprocesado') {
+      const receta = DB.recetas[p.recetaId];
+      if(receta && receta.ingredients) {
+        Object.values(receta.ingredients).forEach(ing => {
+          if(ing.code === code) t -= ing.qty * Number(p.actualLotes || p.lotes);
+        });
+      }
+    }
+  });
+  return Math.max(0, t);
+}
+
+function getStockProducto(recetaId) {
+  let t = 0;
+  // Sumar desde producciones completadas
+  Object.values(DB.produccion).forEach(p => {
+    if(p.recetaId === recetaId && p.estado === 'completado' && p.tipo !== 'semiprocesado') {
+      t += Number(p.actualLotes || p.lotes);
+    }
+  });
+  // Descontar ventas no canceladas
+  Object.values(DB.ventas).forEach(v => {
+    if(v.recetaId === recetaId && v.estado !== 'cancelado') t -= Number(v.qty || 0);
+  });
+  return Math.max(0, t);
 }
 
 // ════════════════════════════════════════════════════════
@@ -901,7 +955,7 @@ function subscribeAll() {
     insumos:    () => { renderInsumosTable(); renderSidebar(CUR_TAB); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
     recetas:    () => { renderRecipeGrid(); renderSidebar(CUR_TAB); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
     produccion: () => { renderProduccion(); renderDashboard(); renderSidebar(CUR_TAB); renderInvProductos(); },
-    compras:    () => { renderCompras(); renderDashboard(); renderSidebar(CUR_TAB); renderInvInsumos(); },
+    compras:    () => { renderCompras(); renderDashboard(); renderSidebar(CUR_TAB); renderInvInsumos(); renderInsumosTable(); },
     ventas:     () => { renderVentas(); renderDashboard(); renderSidebar(CUR_TAB); },
     usuarios:   () => { if(CUR?.role==='admin') loadAdminUsers(); },
     config:     () => { applyConfig(); },
@@ -1390,12 +1444,24 @@ window.deleteInsumo = async code => {
 function renderProduccion() {
   const all=Object.values(DB.produccion).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   document.getElementById('prod-st-total').textContent=all.length;
-  document.getElementById('prod-st-proceso').textContent=all.filter(p=>p.estado==='en proceso').length;
+  document.getElementById('prod-st-proceso').textContent=all.filter(p=>p.estado==='pendiente').length;
   document.getElementById('prod-st-completadas').textContent=all.filter(p=>p.estado==='completado').length;
   const delBtn=canWrite()?id=>`<button class="icon-btn danger" onclick="deleteProd('${id}')">✕</button>`:()=>'';
+  const confirmBtn=canWrite()?p=>p.estado!=='completado'?`<button class="btn btn-green btn-sm" onclick="openConfirmProd('${p.id}')">✓ Confirmar</button>`:''
+    :()=>'';
   document.getElementById('prod-table').innerHTML=all.map(p=>`
-    <tr><td class="mono muted">${p.fecha||'—'}</td><td><strong>${escH(p.recetaNombre||'—')}</strong></td><td class="mono">${p.lotes}</td><td class="muted">${escH(p.operario||'—')}</td><td>${estBadge(p.estado)}</td><td class="muted" style="font-size:11px">${escH(p.notas||'')}</td><td>${delBtn(p.id)}</td></tr>
-  `).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin órdenes de producción. Crea la primera.</td></tr>';
+    <tr>
+      <td class="mono muted">${p.fecha||'—'}</td>
+      <td><strong>${escH(p.recetaNombre||'—')}</strong></td>
+      <td><span class="tag ${p.tipo==='semiprocesado'?'tag-add':'tag-other'}">${p.tipo==='semiprocesado'?'Semiprocesado':'Normal'}</span></td>
+      <td class="mono">${p.lotes}</td>
+      <td class="mono ${p.actualLotes?'accent':'muted'}">${p.actualLotes||'—'}</td>
+      <td class="muted">${escH(p.operario||'—')}</td>
+      <td>${p.estado==='completado'?'<span class="est-badge est-completado">✓ Confirmado</span>':estBadge(p.estado)}</td>
+      <td class="muted" style="font-size:11px">${escH(p.notas||'')}</td>
+      <td style="display:flex;gap:4px;align-items:center;">${confirmBtn(p)} ${delBtn(p.id)}</td>
+    </tr>
+  `).join()||'<tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:28px">Sin órdenes de producción. Crea la primera.</td></tr>';
 }
 
 window.deleteProd = async id => {
@@ -1405,22 +1471,72 @@ window.deleteProd = async id => {
   renderProduccion(); renderDashboard(); toast('Orden eliminada');
 };
 
+window.openConfirmProd = id => {
+  CUR_CONFIRM_PROD_ID=id;
+  const p=DB.produccion[id]; if(!p) return;
+  const tipoLabel=p.tipo==='semiprocesado'?'Semiprocesado — se agregará a Insumos':'Normal — se agregará a Inventario de Productos';
+  document.getElementById('confirm-prod-info').innerHTML=
+    `<strong>${escH(p.recetaNombre||'—')}</strong><br>
+     Lotes planeados: <strong>${p.lotes}</strong> &nbsp;·&nbsp; Tipo: <strong>${tipoLabel}</strong>`;
+  document.getElementById('confirm-prod-lotes').value=p.lotes;
+  document.getElementById('confirm-prod-notas').value='';
+  openModal('modal-confirm-prod');
+};
+
+window.submitConfirmProd = async () => {
+  if(!CUR_CONFIRM_PROD_ID) return;
+  const p=DB.produccion[CUR_CONFIRM_PROD_ID]; if(!p) return;
+  const actualLotes=Number(document.getElementById('confirm-prod-lotes').value)||0;
+  if(actualLotes<=0){toast('Ingresa la cantidad real producida',true);return;}
+  const notas=document.getElementById('confirm-prod-notas').value;
+  await fbUpdate(`produccion/${CUR_CONFIRM_PROD_ID}`,{estado:'completado',actualLotes,notas:notas||p.notas||''});
+  DB.produccion[CUR_CONFIRM_PROD_ID]={...p,estado:'completado',actualLotes,notas:notas||p.notas||''};
+  // Si es semiprocesado: crear/actualizar insumo con el costo de producción
+  if(p.tipo==='semiprocesado') {
+    const receta=DB.recetas[p.recetaId];
+    const costs=receta?calcCosts(receta):{unit:0};
+    const semiCode='SEMI_'+p.recetaId;
+    const semiIng=DB.insumos[semiCode];
+    const prevUm=semiIng?Number(semiIng.um||0):0;
+    const newUm=prevUm+actualLotes;
+    const semiData={code:semiCode,name:p.recetaNombre,cat:'Semiprocesado',prov:'PROCADE',
+      cmaster:costs.unit*newUm,um:newUm,desc:'Lotes producidos',pais:'Peru'};
+    await fbSet(`insumos/${semiCode}`,semiData);
+    DB.insumos[semiCode]=semiData;
+  }
+  closeModal('modal-confirm-prod');
+  CUR_CONFIRM_PROD_ID=null;
+  renderProduccion(); renderDashboard(); renderInvProductos(); renderInvInsumos(); renderInsumosTable();
+  toast('✓ Producción confirmada');
+};
+
 // ════════════════════════════════════════════════════════
 // RENDER: COMPRAS
 // ════════════════════════════════════════════════════════
 function renderCompras() {
   const q=(document.getElementById('compras-search')||{value:''}).value.toLowerCase();
   let all=Object.values(DB.compras).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(q) all=all.filter(c=>(c.ingName||'').toLowerCase().includes(q)||(c.ingCode||'').toLowerCase().includes(q));
-  let totalGasto=0; Object.values(DB.compras).forEach(c=>totalGasto+=Number(c.pricePaid||0));
+  if(q) all=all.filter(c=>(c.ingName||'').toLowerCase().includes(q)||(c.ingCode||'').toLowerCase().includes(q)||(c.prov||'').toLowerCase().includes(q));
+  let totalGasto=0; Object.values(DB.compras).forEach(c=>totalGasto+=Number(c.cmaster||c.pricePaid||0));
   const ingSet=new Set(Object.values(DB.compras).map(c=>c.ingCode));
   document.getElementById('cmp-st-total').textContent=Object.keys(DB.compras).length;
   document.getElementById('cmp-st-gasto').textContent=fmt(totalGasto);
   document.getElementById('cmp-st-items').textContent=ingSet.size;
   const delBtn=canWrite()?id=>`<button class="icon-btn danger" onclick="deleteCompra('${id}')">✕</button>`:()=>'';
   document.getElementById('compras-table').innerHTML=all.map(c=>`
-    <tr><td class="mono muted">${c.date||'—'}</td><td><strong>${escH(c.ingName||'—')}</strong><br><span style="font-size:9px;color:var(--text-dim)">${c.ingCode}</span></td><td class="muted">${escH(c.prov||'')}</td><td class="mono">${Number(c.qty).toFixed(1)}</td><td class="accent mono">${fmt(c.pricePaid)}</td><td class="mono">${fmtG(c.costPerG)}/g</td><td class="muted" style="font-size:11px">${escH(c.notes||'')}</td><td>${delBtn(c.id)}</td></tr>
-  `).join()||'<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:28px">Sin compras registradas.</td></tr>';
+    <tr>
+      <td class="mono muted">${c.date||'—'}</td>
+      <td class="mono" style="color:var(--text-dim)">${escH(c.ingCode||'')}</td>
+      <td><strong>${escH(c.ingName||'—')}</strong></td>
+      <td>${catTag(c.ingCat||c.cat||'')}</td>
+      <td class="muted">${escH(c.prov||'')}</td>
+      <td class="muted">${escH(c.desc||'')}</td>
+      <td class="accent mono">${fmt(c.cmaster||c.pricePaid||0)}</td>
+      <td class="mono">${Number(c.um||c.qty||0).toFixed(0)}</td>
+      <td class="mono">${fmtG(c.costPerG||0)}/g</td>
+      <td>${delBtn(c.id)}</td>
+    </tr>
+  `).join()||'<tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:28px">Sin compras registradas.</td></tr>';
 }
 
 window.deleteCompra = async id => {
@@ -1459,31 +1575,41 @@ window.deleteVenta = async id => {
 // ════════════════════════════════════════════════════════
 function renderInvInsumos() {
   const el=document.getElementById('inv-ins-table'); if(!el) return;
-  const stockMap={};
-  Object.values(DB.compras).forEach(c=>{
-    if(!stockMap[c.ingCode]) stockMap[c.ingCode]={name:c.ingName,cat:'',qty:0,lastDate:'',lastPrice:0,lastCPG:0,count:0};
-    stockMap[c.ingCode].qty+=Number(c.qty||0); stockMap[c.ingCode].count++;
-    if((c.date||'')>=(stockMap[c.ingCode].lastDate||'')){stockMap[c.ingCode].lastDate=c.date;stockMap[c.ingCode].lastPrice=Number(c.pricePaid||0);stockMap[c.ingCode].lastCPG=Number(c.costPerG||0);}
-  });
-  Object.keys(stockMap).forEach(code=>{const i=DB.insumos[code]; if(i) stockMap[code].cat=i.cat;});
-  el.innerHTML=Object.keys(stockMap).map(code=>{
-    const s=stockMap[code];
-    return `<tr><td><strong>${escH(s.name)}</strong><br><span style="font-size:9px;color:var(--text-dim)">${code}</span></td><td>${catTag(s.cat)}</td><td class="accent mono">${s.qty.toFixed(1)}</td><td class="muted mono">${s.lastDate||'—'}</td><td class="mono">${fmt(s.lastPrice)}</td><td class="accent mono">${fmtG(s.lastCPG)}/g</td><td class="mono">${s.count}</td></tr>`;
-  }).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin stock. Registra compras para ver el inventario.</td></tr>';
+  const insumos=Object.values(DB.insumos);
+  if(!insumos.length){el.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:28px">Sin insumos. Registra compras para ver el inventario.</td></tr>';return;}
+  el.innerHTML=insumos.map(i=>{
+    const stock=getStockInsumo(i.code);
+    const compras=Object.values(DB.compras).filter(c=>c.ingCode===i.code);
+    const lastC=compras.sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+    const stockBadge=stock>0?`<span class="inv-badge inv-ok">${stock.toFixed(1)}</span>`:`<span class="inv-badge inv-zero">0</span>`;
+    return `<tr>
+      <td><strong>${escH(i.name)}</strong><br><span style="font-size:9px;color:var(--text-dim)">${i.code}</span></td>
+      <td>${catTag(i.cat)}</td>
+      <td>${stockBadge}</td>
+      <td class="muted mono">${lastC?lastC.date:'—'}</td>
+      <td class="mono">${lastC?fmt(lastC.cmaster||lastC.pricePaid||0):'—'}</td>
+      <td class="accent mono">${fmtG(insumoCPG(i))}/g</td>
+      <td class="mono">${compras.length}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderInvProductos() {
   const el=document.getElementById('inv-prod-table'); if(!el) return;
-  const prodMap={};
-  Object.values(DB.produccion).filter(p=>p.estado==='completado').forEach(p=>{
-    if(!prodMap[p.recetaId]) prodMap[p.recetaId]={nombre:p.recetaNombre,lotes:0,lastDate:'',count:0};
-    prodMap[p.recetaId].lotes+=Number(p.lotes||0); prodMap[p.recetaId].count++;
-    if((p.fecha||'')>=(prodMap[p.recetaId].lastDate||'')) prodMap[p.recetaId].lastDate=p.fecha;
-  });
-  el.innerHTML=Object.keys(prodMap).map(id=>{
-    const p=prodMap[id];
-    return `<tr><td><strong>${escH(p.nombre||id)}</strong></td><td class="accent mono">${p.lotes}</td><td class="muted mono">${p.lastDate||'—'}</td><td class="mono">${p.count}</td></tr>`;
-  }).join()||'<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:28px">Sin productos completados aún.</td></tr>';
+  const recetas=Object.values(DB.recetas).filter(r=>r.cat!=='Semiprocesado');
+  if(!recetas.length){el.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:28px">Sin productos. Crea recetas y confirma producciones.</td></tr>';return;}
+  el.innerHTML=recetas.map(r=>{
+    const stock=getStockProducto(r.id);
+    const prods=Object.values(DB.produccion).filter(p=>p.recetaId===r.id&&p.estado==='completado'&&p.tipo!=='semiprocesado');
+    const lastP=prods.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''))[0];
+    const stockBadge=stock>0?`<span class="inv-badge inv-ok">${stock} lotes</span>`:`<span class="inv-badge inv-zero">0</span>`;
+    return `<tr>
+      <td><strong>${escH(r.name)}</strong></td>
+      <td>${stockBadge}</td>
+      <td class="muted mono">${lastP?lastP.fecha:'—'}</td>
+      <td class="mono">${prods.length}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ════════════════════════════════════════════════════════
@@ -1613,32 +1739,41 @@ window.selectPurIng = code => {
   PUR_CODE=code; const ing=DB.insumos[code];
   document.getElementById('pur-q').value=ing.name;
   document.getElementById('pur-code').value=code;
+  document.getElementById('pur-name').value=ing.name;
+  const catSel=document.getElementById('pur-cat'); if(catSel) catSel.value=ing.cat||'Vegetales';
   document.getElementById('pur-prov').value=ing.prov||'';
+  document.getElementById('pur-desc').value=ing.desc||'';
+  document.getElementById('pur-cmaster').value=ing.cmaster||'';
+  document.getElementById('pur-um').value=ing.um||'';
   document.getElementById('pur-dd').classList.remove('open');
   calcPurCPG();
 };
 window.calcPurCPG = () => {
-  const qty=Number(document.getElementById('pur-qty').value)||0, price=Number(document.getElementById('pur-price').value)||0;
-  document.getElementById('pur-cpg').value=qty>0?fmtG(price/qty)+' '+cur()+'/g':'—';
+  const um=Number(document.getElementById('pur-um').value)||0, cmaster=Number(document.getElementById('pur-cmaster').value)||0;
+  document.getElementById('pur-cpg').value=um>0?fmtG(cmaster/um)+' '+cur()+'/g':'—';
 };
 window.submitCompra = async () => {
-  if(!PUR_CODE){toast('Selecciona un insumo',true);return;}
-  const qty=Number(document.getElementById('pur-qty').value)||0, price=Number(document.getElementById('pur-price').value)||0;
-  if(qty<=0){toast('Cantidad mayor a 0',true);return;}
-  const ing=DB.insumos[PUR_CODE];
-  const entry={id:'',ingCode:PUR_CODE,ingName:ing?ing.name:PUR_CODE,prov:document.getElementById('pur-prov').value,date:document.getElementById('pur-date').value||new Date().toISOString().split('T')[0],qty,pricePaid:price,costPerG:qty>0?price/qty:0,notes:document.getElementById('pur-notes').value,savedBy:CUR?.name||''};
+  const code=document.getElementById('pur-code').value.trim();
+  const name=document.getElementById('pur-name').value.trim();
+  const cmaster=Number(document.getElementById('pur-cmaster').value)||0;
+  const um=Number(document.getElementById('pur-um').value)||0;
+  if(!code||!name){toast('Ingresa código y nombre del insumo',true);return;}
+  if(um<=0){toast('UM debe ser mayor a 0',true);return;}
+  const cat=document.getElementById('pur-cat').value;
+  const prov=document.getElementById('pur-prov').value;
+  const desc=document.getElementById('pur-desc').value;
+  const date=document.getElementById('pur-date').value||new Date().toISOString().split('T')[0];
+  const costPerG=um>0?cmaster/um:0;
+  const entry={id:'',ingCode:code,ingName:name,ingCat:cat,prov,desc,cmaster,um,costPerG,date,savedBy:CUR?.name||''};
   const newRef=await push(ref(db,'compras'),entry);
   entry.id=newRef.key; DB.compras[newRef.key]=entry;
-  if(document.getElementById('pur-upd').checked&&ing){
-    await fbUpdate(`insumos/${PUR_CODE}`,{cmaster:price,um:qty});
-    ing.cmaster=price; ing.um=qty;
-  }
+  // Crear o actualizar el insumo con los datos de la compra
+  const ingData={code,name,cat,prov,cmaster,um,desc,pais:DB.insumos[code]?.pais||'Peru'};
+  await fbSet(`insumos/${code}`,ingData);
+  DB.insumos[code]=ingData;
   closeModal('modal-new-compra'); PUR_CODE=null;
-  ['pur-q','pur-code','pur-prov','pur-notes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
-  const qEl=document.getElementById('pur-qty'); if(qEl) qEl.value='1000';
-  const pEl=document.getElementById('pur-price'); if(pEl) pEl.value='0';
-  const cEl=document.getElementById('pur-cpg'); if(cEl) cEl.value='';
-  renderCompras(); renderDashboard(); renderInvInsumos(); toast('✓ Compra registrada');
+  ['pur-q','pur-code','pur-name','pur-prov','pur-desc','pur-cmaster','pur-um','pur-cpg'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  renderCompras(); renderInsumosTable(); renderDashboard(); renderInvInsumos(); toast('✓ Compra registrada');
 };
 
 // ── Nueva Orden de Producción ──
@@ -1651,12 +1786,14 @@ window.submitProduccion = async () => {
   const recetaId=document.getElementById('prod-receta').value;
   if(!recetaId){toast('Selecciona una receta',true);return;}
   const receta=DB.recetas[recetaId];
-  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,estado:document.getElementById('prod-estado').value||'pendiente',notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
+  const tipo=document.getElementById('prod-tipo')?.value||'normal';
+  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,tipo,estado:'pendiente',actualLotes:null,notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
   const newRef=await push(ref(db,'produccion'),entry);
   entry.id=newRef.key; DB.produccion[newRef.key]=entry;
   closeModal('modal-new-prod');
-  ['prod-lotes','prod-operario','prod-notas'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=id==='prod-lotes'?'1':'';});
-  renderProduccion(); renderDashboard(); renderInvProductos(); toast('✓ Orden de producción creada');
+  ['prod-operario','prod-notas'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const lEl=document.getElementById('prod-lotes'); if(lEl) lEl.value='1';
+  renderProduccion(); renderDashboard(); toast('✓ Orden de producción creada');
 };
 
 // ── Nueva Venta ──
@@ -1664,19 +1801,32 @@ window.calcVentaTotal = () => {
   const qty=Number(document.getElementById('ven-qty').value)||0, precio=Number(document.getElementById('ven-precio').value)||0;
   const el=document.getElementById('ven-total'); if(el) el.value=fmt(qty*precio);
 };
+window.onVentaProductoChange = () => {
+  const recetaId=document.getElementById('ven-receta-id')?.value;
+  if(!recetaId) return;
+  const receta=DB.recetas[recetaId];
+  if(receta) {
+    const pEl=document.getElementById('ven-precio'); if(pEl&&receta.precio>0) pEl.value=receta.precio;
+    calcVentaTotal();
+  }
+};
 window.submitVenta = async () => {
-  const producto=document.getElementById('ven-producto').value.trim();
-  if(!producto){toast('Ingresa el producto',true);return;}
+  const recetaId=document.getElementById('ven-receta-id')?.value;
+  if(!recetaId){toast('Selecciona un producto',true);return;}
+  const receta=DB.recetas[recetaId];
   const qty=Number(document.getElementById('ven-qty').value)||1;
+  const stock=getStockProducto(recetaId);
+  if(qty>stock){toast(`Stock insuficiente. Disponible: ${stock} lotes`,true);return;}
   const precioUnit=Number(document.getElementById('ven-precio').value)||0;
-  const entry={id:'',producto,qty,precioUnit,total:qty*precioUnit,fecha:document.getElementById('ven-fecha').value||new Date().toISOString().split('T')[0],cliente:document.getElementById('ven-cliente').value,estado:document.getElementById('ven-estado').value||'pendiente',notas:document.getElementById('ven-notas').value,savedBy:CUR?.name||''};
+  const entry={id:'',recetaId,producto:receta?.name||recetaId,qty,precioUnit,total:qty*precioUnit,fecha:document.getElementById('ven-fecha').value||new Date().toISOString().split('T')[0],cliente:document.getElementById('ven-cliente').value,estado:document.getElementById('ven-estado').value||'pendiente',notas:document.getElementById('ven-notas').value,savedBy:CUR?.name||''};
   const newRef=await push(ref(db,'ventas'),entry);
   entry.id=newRef.key; DB.ventas[newRef.key]=entry;
   closeModal('modal-new-venta');
-  ['ven-producto','ven-cliente','ven-notas','ven-total'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  ['ven-cliente','ven-notas','ven-total'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   const qEl=document.getElementById('ven-qty'); if(qEl) qEl.value='1';
   const pEl=document.getElementById('ven-precio'); if(pEl) pEl.value='0';
-  renderVentas(); renderDashboard(); toast('✓ Venta registrada');
+  const rEl=document.getElementById('ven-receta-id'); if(rEl) rEl.value='';
+  renderVentas(); renderDashboard(); renderInvProductos(); toast('✓ Venta registrada');
 };
 
 // ════════════════════════════════════════════════════════
@@ -1694,6 +1844,14 @@ window.openModal = id => {
   }
   if(id==='modal-new-venta') {
     const vd=document.getElementById('ven-fecha'); if(vd) vd.value=new Date().toISOString().split('T')[0];
+    const sel=document.getElementById('ven-receta-id');
+    if(sel) {
+      sel.innerHTML='<option value="">Seleccionar producto…</option>'+
+        Object.values(DB.recetas).map(r=>{
+          const stock=getStockProducto(r.id);
+          return `<option value="${r.id}">${escH(r.name)} · Stock: ${stock} lotes</option>`;
+        }).join('');
+    }
   }
 };
 window.closeModal = id => document.getElementById(id).classList.remove('open');

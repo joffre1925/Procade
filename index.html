@@ -497,6 +497,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
           </tr></tfoot>
         </table></div>
       </div>
+      <div id="det-pres-panel" style="margin-top:16px;"></div>
     </div>
 
     <!-- ── INSUMOS ── -->
@@ -526,7 +527,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <div class="stat-card"><div class="sc-label">Confirmadas</div><div class="sc-val green" id="prod-st-completadas">0</div><div class="sc-sub">finalizadas</div></div>
       </div>
       <div class="panel"><div style="padding:0"><table>
-        <thead><tr><th>Fecha</th><th>Receta</th><th>Tipo</th><th>Lotes Plan.</th><th>Lotes Real</th><th>Operario</th><th>Estado</th><th>Notas</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Receta</th><th>Presentación</th><th>Tipo</th><th>Lotes Plan.</th><th>Lotes Real</th><th>Costo/Un</th><th>Operario</th><th>Estado</th><th></th></tr></thead>
         <tbody id="prod-table"></tbody>
       </table></div></div>
     </div>
@@ -751,7 +752,9 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
 <div class="modal-overlay" id="modal-new-prod"><div class="modal">
   <div class="modal-title">🏭 Nueva Orden de Producción</div>
   <div class="form-grid">
-    <div class="ff full"><label>Receta</label><select id="prod-receta" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"><option value="">Seleccionar…</option></select></div>
+    <div class="ff full"><label>Receta</label><select id="prod-receta" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;" onchange="onProdRecetaChange()"><option value="">Seleccionar…</option></select></div>
+    <div class="ff full"><label>Presentación (tamaño de envase)</label><select id="prod-presentacion" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;"><option value="">Selecciona una receta primero…</option></select></div>
+    <div class="ff full" id="prod-costo-info" style="display:none;background:rgba(212,168,75,.07);border:1px solid rgba(212,168,75,.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text-muted);"></div>
     <div class="ff"><label>Cantidad de Lotes Planeados</label><input id="prod-lotes" type="number" value="1" min="1"></div>
     <div class="ff"><label>Fecha</label><input id="prod-fecha" type="date"></div>
     <div class="ff"><label>Operario Responsable</label><input id="prod-operario" placeholder="Nombre del operario"></div>
@@ -816,6 +819,20 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
   <div class="modal-footer">
     <button class="btn btn-secondary" onclick="closeModal('modal-new-venta')">Cancelar</button>
     <button class="btn btn-primary" onclick="submitVenta()">💾 Guardar Venta</button>
+  </div>
+</div></div>
+<!-- ── MODAL: AGREGAR PRESENTACIÓN ── -->
+<div class="modal-overlay" id="modal-add-presentacion"><div class="modal">
+  <div class="modal-title">＋ Nueva Presentación</div>
+  <div class="form-grid">
+    <div class="ff"><label>Nombre</label><input id="pres-nombre" placeholder="ej. 250ml, 1L, Familiar"></div>
+    <div class="ff"><label>Tamaño de Envase (g/ml)</label><input id="pres-envase" type="number" placeholder="250" oninput="calcPresPreview()"></div>
+    <div class="ff"><label>Precio de Venta</label><input id="pres-precio" type="number" step="0.01" value="0"></div>
+    <div class="ff full" id="pres-preview" style="display:none;background:rgba(212,168,75,.07);border:1px solid rgba(212,168,75,.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text-muted);"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeModal('modal-add-presentacion')">Cancelar</button>
+    <button class="btn btn-primary" onclick="addPresentacion()">Agregar Presentación</button>
   </div>
 </div></div>
 <div id="toast"></div>
@@ -955,7 +972,7 @@ async function fbRemove(path)       { savePending(); try { await remove(ref(db,p
 function subscribeAll() {
   const paths = {
     insumos:    () => { renderInsumosTable(); renderSidebar(CUR_TAB); renderDashboard(); if(CUR_RECIPE_ID) refreshDetail(); },
-    recetas:    () => { renderRecipeGrid(); renderSidebar(CUR_TAB); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) refreshDetail(); },
+    recetas:    () => { renderRecipeGrid(); renderSidebar(CUR_TAB); renderDashboard(); renderPricing(); if(CUR_RECIPE_ID) renderRecipeDetail(); },
     produccion: () => { renderProduccion(); renderDashboard(); renderSidebar(CUR_TAB); renderInvProductos(); },
     compras:    () => { renderCompras(); renderDashboard(); renderSidebar(CUR_TAB); renderInvInsumos(); renderInsumosTable(); },
     ventas:     () => { renderVentas(); renderDashboard(); renderSidebar(CUR_TAB); },
@@ -1351,9 +1368,40 @@ function renderRecipeDetail() {
     <div class="rf-field"><label>Nombre</label><input value="${escH(r.name)}" ${ro?'readonly':''} onchange="updateRecipeField('name',this.value)"></div>
     <div class="rf-field"><label>Cantidad por Lote (unidades)</label><input type="number" value="${r.orden}" ${ro?'readonly':''} onchange="updateRecipeField('orden',Number(this.value))"></div>
     <div class="rf-field"><label>Tamaño de Envase (ml/g)</label><input type="number" value="${r.envase}" ${ro?'readonly':''} onchange="updateRecipeField('envase',Number(this.value))"></div>
-    <div class="rf-field"><label>Precio de Venta</label><input type="number" step="0.01" value="${r.precio}" ${ro?'readonly':''} onchange="updateRecipeField('precio',Number(this.value))"></div>
+    <div class="rf-field"><label>Precio de Venta (Base)</label><input type="number" step="0.01" value="${r.precio}" ${ro?'readonly':''} onchange="updateRecipeField('precio',Number(this.value))"></div>
     <div class="rf-field"><label>Categoría</label><select ${ro?'disabled':''} onchange="updateRecipeField('cat',this.value)">${['Salsas','Proteinas','Condimentos','Otro'].map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
   refreshDetail();
+  // Panel de presentaciones
+  const pres=Object.values(r.presentaciones||{});
+  const bc=calcCosts(r);
+  const presRows=pres.map(p=>{
+    const factor=(r.envase&&p.envase)?p.envase/r.envase:1;
+    const cu=bc.unit*factor;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface2);">
+      <div style="flex:1"><strong>${escH(p.nombre)}</strong> <span style="color:var(--text-dim);font-size:11px;font-family:'DM Mono',monospace">${p.envase}g/ml</span></div>
+      <div class="mono accent" style="font-size:12px">${fmt(cu)}/un</div>
+      <div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">×${factor.toFixed(3)}</div>
+      ${p.precio>0?`<div class="mono" style="font-size:11px;color:var(--green)">${fmt(p.precio)} venta</div>`:''}
+      ${ro?'':`<button class="icon-btn danger" onclick="deletePresentacion('${p.id}')">✕</button>`}
+    </div>`;
+  }).join('');
+  const presPanelEl=document.getElementById('det-pres-panel');
+  if(presPanelEl) presPanelEl.innerHTML=`<div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Presentaciones · Diferentes Tamaños</div>
+      ${ro?'':`<button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-presentacion')">＋ Agregar Presentación</button>`}
+    </div>
+    <div style="padding:0 16px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface2);">
+        <div style="flex:1"><strong>Base</strong> <span style="color:var(--text-dim);font-size:11px;font-family:'DM Mono',monospace">${r.envase}g/ml</span></div>
+        <div class="mono accent" style="font-size:12px">${fmt(bc.unit)}/un</div>
+        <div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">×1.000</div>
+        ${r.precio>0?`<div class="mono" style="font-size:11px;color:var(--green)">${fmt(r.precio)} venta</div>`:''}
+        ${ro?'':`<div style="width:22px"></div>`}
+      </div>
+      ${presRows||`<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px">Sin presentaciones adicionales — agrega tamaños alternativos</div>`}
+    </div>
+  </div>`;
 }
 
 function refreshDetail() {
@@ -1403,6 +1451,65 @@ window.removeIngFromRecipe = async key => {
   await fbRemove(`recetas/${CUR_RECIPE_ID}/ingredients/${key}`);
   delete DB.recetas[CUR_RECIPE_ID].ingredients[key];
   refreshDetail();
+};
+window.calcPresPreview = () => {
+  const r=getR(); if(!r) return;
+  const envase=Number(document.getElementById('pres-envase').value)||0;
+  const el=document.getElementById('pres-preview'); if(!el) return;
+  if(envase<=0){el.style.display='none';return;}
+  const factor=r.envase?envase/r.envase:1;
+  const bc=calcCosts(r);
+  const cu=bc.unit*factor;
+  el.style.display='';
+  el.innerHTML=`Factor vs. base (${r.envase}g): <strong>×${factor.toFixed(3)}</strong> → Costo estimado: <strong class="accent">${fmt(cu)}/un</strong>`;
+};
+window.addPresentacion = async () => {
+  if(!CUR_RECIPE_ID){toast('Abre una receta primero',true);return;}
+  const nombre=document.getElementById('pres-nombre').value.trim();
+  const envase=Number(document.getElementById('pres-envase').value)||0;
+  const precio=Number(document.getElementById('pres-precio').value)||0;
+  if(!nombre||envase<=0){toast('Ingresa nombre y tamaño',true);return;}
+  const pid='P_'+Date.now();
+  const pdata={id:pid,nombre,envase,precio};
+  await fbSet(`recetas/${CUR_RECIPE_ID}/presentaciones/${pid}`,pdata);
+  if(!DB.recetas[CUR_RECIPE_ID].presentaciones) DB.recetas[CUR_RECIPE_ID].presentaciones={};
+  DB.recetas[CUR_RECIPE_ID].presentaciones[pid]=pdata;
+  closeModal('modal-add-presentacion');
+  ['pres-nombre','pres-envase'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('pres-precio').value='0';
+  const pv=document.getElementById('pres-preview');if(pv)pv.style.display='none';
+  renderRecipeDetail(); toast('✓ Presentación agregada');
+};
+window.deletePresentacion = async pid => {
+  if(!CUR_RECIPE_ID||!confirm('¿Eliminar esta presentación?')) return;
+  await fbRemove(`recetas/${CUR_RECIPE_ID}/presentaciones/${pid}`);
+  delete DB.recetas[CUR_RECIPE_ID].presentaciones[pid];
+  renderRecipeDetail(); toast('Presentación eliminada');
+};
+window.onProdRecetaChange = () => {
+  const recetaId=document.getElementById('prod-receta')?.value;
+  const presSel=document.getElementById('prod-presentacion');
+  const infoEl=document.getElementById('prod-costo-info');
+  if(!presSel) return;
+  if(!recetaId){presSel.innerHTML='<option value="">Selecciona una receta primero…</option>';if(infoEl)infoEl.style.display='none';return;}
+  const r=DB.recetas[recetaId]; if(!r) return;
+  const bc=calcCosts(r);
+  const pres=Object.values(r.presentaciones||{});
+  presSel.innerHTML=`<option value="">Base — ${r.envase}g/ml (${fmt(bc.unit)}/un)</option>`+
+    pres.map(p=>{
+      const factor=r.envase?p.envase/r.envase:1;
+      const cu=bc.unit*factor;
+      return `<option value="${p.id}">${escH(p.nombre)} — ${p.envase}g/ml (${fmt(cu)}/un)</option>`;
+    }).join('');
+  if(infoEl){infoEl.style.display='';infoEl.textContent=`Costo base: ${fmt(bc.unit)}/un · Selecciona presentación para ajustar el costo`;}
+  presSel.onchange=()=>{
+    if(!infoEl) return;
+    const pid=presSel.value;
+    if(!pid){infoEl.textContent=`Costo: ${fmt(bc.unit)}/un (base ${r.envase}g/ml)`;return;}
+    const p=r.presentaciones?.[pid]; if(!p) return;
+    const factor=r.envase?p.envase/r.envase:1;
+    infoEl.textContent=`Costo: ${fmt(bc.unit*factor)}/un · Factor ×${factor.toFixed(3)} (${p.envase}g/ml vs base ${r.envase}g/ml)`;
+  };
 };
 window.deleteCurrentRecipe = async () => {
   if(!CUR_RECIPE_ID||!confirm('¿Eliminar esta receta?')) return;
@@ -1465,12 +1572,13 @@ function renderProduccion() {
     <tr>
       <td class="mono muted">${p.fecha||'—'}</td>
       <td><strong>${escH(p.recetaNombre||'—')}</strong></td>
+      <td class="muted" style="font-size:11px">${escH(p.presNombre||`Base`)}</td>
       <td><span class="tag ${p.tipo==='semiprocesado'?'tag-add':'tag-other'}">${p.tipo==='semiprocesado'?'Semiprocesado':'Normal'}</span></td>
       <td class="mono">${p.lotes}</td>
       <td class="mono ${p.actualLotes?'accent':'muted'}">${p.actualLotes||'—'}</td>
+      <td class="accent mono">${p.costUnit?fmt(p.costUnit):'—'}</td>
       <td class="muted">${escH(p.operario||'—')}</td>
       <td>${p.estado==='completado'?'<span class="est-badge est-completado">✓ Confirmado</span>':estBadge(p.estado)}</td>
-      <td class="muted" style="font-size:11px">${escH(p.notas||'')}</td>
       <td style="display:flex;gap:4px;align-items:center;">${confirmBtn(p)} ${delBtn(p.id)}</td>
     </tr>
   `).join()||'<tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:28px">Sin órdenes de producción. Crea la primera.</td></tr>';
@@ -1799,7 +1907,14 @@ window.submitProduccion = async () => {
   if(!recetaId){toast('Selecciona una receta',true);return;}
   const receta=DB.recetas[recetaId];
   const tipo=document.getElementById('prod-tipo')?.value||'normal';
-  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,tipo,estado:'pendiente',actualLotes:null,notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
+  const presId=document.getElementById('prod-presentacion')?.value||'';
+  const pres=presId&&receta?.presentaciones?.[presId]?receta.presentaciones[presId]:null;
+  const presNombre=pres?pres.nombre:`Base (${receta?.envase||'?'}g/ml)`;
+  const presEnvase=pres?pres.envase:(receta?.envase||0);
+  const bc=receta?calcCosts(receta):{unit:0};
+  const factor=(receta?.envase&&presEnvase)?presEnvase/receta.envase:1;
+  const costUnit=bc.unit*factor;
+  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,tipo,estado:'pendiente',actualLotes:null,presNombre,presEnvase,costUnit,notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
   const newRef=await push(ref(db,'produccion'),entry);
   entry.id=newRef.key; DB.produccion[newRef.key]=entry;
   closeModal('modal-new-prod');
@@ -1850,6 +1965,8 @@ window.openModal = id => {
   if(id==='modal-new-prod') {
     populateProdRecetaSelect();
     const fd=document.getElementById('prod-fecha'); if(fd) fd.value=new Date().toISOString().split('T')[0];
+    const ps=document.getElementById('prod-presentacion'); if(ps) ps.innerHTML='<option value="">Selecciona una receta primero…</option>';
+    const pi=document.getElementById('prod-costo-info'); if(pi) pi.style.display='none';
   }
   if(id==='modal-new-compra') {
     const pd=document.getElementById('pur-date'); if(pd) pd.value=new Date().toISOString().split('T')[0];

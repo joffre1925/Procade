@@ -1415,7 +1415,13 @@ function renderRecipeGrid() {
     const c=calcCosts(r), mg=r.precio>0?((r.precio-c.unit)/r.precio*100).toFixed(1)+'%':'—';
     const totalPesoCard=Object.values(r.ingredients||{}).reduce((s,ri)=>s+Number(ri.qty||0),0);
     const rendCard=(r.envase&&r.envase>0)?(totalPesoCard/r.envase).toFixed(1)+'un':'—';
-    return `<div class="recipe-card" onclick="openRecipe('${r.id}')"><div class="rc-name">${escH(r.name)}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div><div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Cant. x Lote</div><div class="val">${r.orden}</div></div><div class="rc-stat"><div class="lbl">Rendimiento</div><div class="val">${rendCard}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div></div>`;
+    return `<div class="recipe-card" onclick="openRecipe('${r.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><div class="rc-name">${escH(r.name)}</div><div class="rc-meta">${r.cat} · ${Object.keys(r.ingredients||{}).length} insumos</div></div>
+        ${canWrite()?`<button class="icon-btn" title="Duplicar receta" onclick="event.stopPropagation();duplicateRecipe('${r.id}')" style="font-size:15px;opacity:.6">⧉</button>`:''}
+      </div>
+      <div class="rc-stats"><div class="rc-stat"><div class="lbl">Costo Unit.</div><div class="val accent">${fmt(c.unit)}</div></div><div class="rc-stat"><div class="lbl">Cant. x Lote</div><div class="val">${r.orden}</div></div><div class="rc-stat"><div class="lbl">Rendimiento</div><div class="val">${rendCard}</div></div><div class="rc-stat"><div class="lbl">Margen</div><div class="val ${r.precio>c.unit?'accent':''}">${mg}</div></div></div>
+    </div>`;
   }).join('');
 }
 
@@ -1638,18 +1644,18 @@ window.deleteCurrentRecipe = async () => {
   delete DB.recetas[CUR_RECIPE_ID]; CUR_RECIPE_ID=null;
   renderSidebar('formulacion'); renderDashboard(); switchTab('formulacion'); toast('Receta eliminada');
 };
-window.duplicateCurrentRecipe = async () => {
-  if(!CUR_RECIPE_ID) return;
-  const r=DB.recetas[CUR_RECIPE_ID]; if(!r) return;
+window.duplicateRecipe = async id => {
+  const r=DB.recetas[id]; if(!r) return;
   const newRef=await push(ref(db,'recetas'),{});
   const newId=newRef.key;
   const copy={...r, id:newId, name:r.name+' - Copia'};
   await fbSet(`recetas/${newId}`, copy);
   DB.recetas[newId]=copy;
   CUR_RECIPE_ID=newId;
-  renderRecipeGrid(); renderSidebar('recipe-detail'); renderRecipeDetail();
+  openRecipe(newId);
   toast('✓ Receta duplicada — renómbrala y ajusta lo necesario');
 };
+window.duplicateCurrentRecipe = async () => { if(CUR_RECIPE_ID) duplicateRecipe(CUR_RECIPE_ID); };
 window.updateRecipePrecio = async (id,val) => {
   await fbUpdate(`recetas/${id}`,{precio:val});
   if(DB.recetas[id]) DB.recetas[id].precio=val;

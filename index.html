@@ -1282,7 +1282,7 @@ function renderSidebar(tab) {
   if (tab==='formulacion'||tab==='recipe-detail') {
     const recs=Object.values(DB.recetas);
     html=`<div class="sb-label">Recetas</div>
-      ${recs.map(r=>`<div class="sb-item${CUR_RECIPE_ID===r.id?' active':''}" onclick="openRecipe('${r.id}')"><span>${escH(r.name)}</span><span class="badge">${r.orden}</span></div>`).join('')}
+      ${recs.map(r=>`<div class="sb-item${CUR_RECIPE_ID===r.id?' active':''}" style="display:flex;align-items:center;gap:4px;"><span style="flex:1;cursor:pointer" onclick="openRecipe('${r.id}')">${escH(r.name)}</span><span class="badge" onclick="openRecipe('${r.id}')">${r.orden}</span><button onclick="event.stopPropagation();duplicateRecipe('${r.id}')" title="Duplicar" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" >⧉</button></div>`).join('')}
       ${canWrite()?`<button class="add-btn" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>`:''}
       <div class="sb-label" style="margin-top:12px">Categorías</div>
       <div class="sb-item" onclick="filterRecipesByCat('')">📋 Todas <span class="badge">${recs.length}</span></div>

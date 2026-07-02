@@ -657,6 +657,10 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <div class="panel-hdr"><div class="panel-title">Todos los Usuarios</div><span id="users-count" style="font-size:11px;color:var(--text-dim)"></span></div>
         <div style="padding:0 16px;" id="all-users-list"><div style="text-align:center;padding:22px;color:var(--text-dim)">Cargando…</div></div>
       </div>
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-hdr"><div class="panel-title">Categorías de Formulación</div></div>
+        <div id="admin-cats-panel" style="padding:16px;"></div>
+      </div>
     </div>
   </div>
 </main>
@@ -913,6 +917,7 @@ let CUR_TAB = 'dashboard';
 // HELPERS
 // ════════════════════════════════════════════════════════
 const cur   = () => DB.config['currency'] || 'S/';
+const getRecetaCats = () => (DB.config['recetaCats'] || 'Salsas,Proteinas,Condimentos,Otro').split(',').map(c=>c.trim()).filter(Boolean);
 const fmt   = n  => cur() + Number(n||0).toFixed(2);
 const fmtG  = n  => Number(n||0).toFixed(4);
 const insumoCPG = i => (!i||!i.um||i.um==0) ? 0 : i.cmaster/i.um;
@@ -1204,7 +1209,7 @@ window.switchTab = tab => {
   if (tab==='ventas')      renderVentas();
   if (tab==='inventario')  renderInvInsumos();
   if (tab==='settings')    populateSettingsInputs();
-  if (tab==='admin')       loadAdminUsers();
+  if (tab==='admin')       { loadAdminUsers(); renderAdminCats(); }
 };
 
 // ════════════════════════════════════════════════════════
@@ -1220,7 +1225,7 @@ function renderSidebar(tab) {
       ${canWrite()?`<button class="add-btn" onclick="openModal('modal-new-recipe')">＋ Nueva Receta</button>`:''}
       <div class="sb-label" style="margin-top:12px">Categorías</div>
       <div class="sb-item" onclick="filterRecipesByCat('')">📋 Todas <span class="badge">${recs.length}</span></div>
-      ${['Salsas','Proteinas','Condimentos','Otro'].map(c=>{const n=recs.filter(r=>r.cat===c).length;return n?`<div class="sb-item" onclick="filterRecipesByCat('${c}')">${c} <span class="badge">${n}</span></div>`:''}).join('')}`;
+      ${getRecetaCats().map(c=>{const n=recs.filter(r=>r.cat===c).length;return n?`<div class="sb-item" onclick="filterRecipesByCat('${c}')">${c} <span class="badge">${n}</span></div>`:''}).join('')}`;
   } else if (tab==='insumos') {
     const cats=[...new Set(Object.values(DB.insumos).map(i=>i.cat))].filter(Boolean).sort();
     html=`<div class="sb-label">Insumos</div>
@@ -1389,7 +1394,7 @@ function renderRecipeDetail() {
     <div class="rf-field"><label>Cantidad por Lote (unidades)</label><input type="number" value="${r.orden}" ${ro?'readonly':''} onchange="updateRecipeField('orden',Number(this.value))"></div>
     <div class="rf-field"><label>Tamaño de Envase (ml/g)</label><input type="number" value="${r.envase}" ${ro?'readonly':''} onchange="updateRecipeField('envase',Number(this.value))"></div>
     <div class="rf-field"><label>Precio de Venta (Base)</label><input type="number" step="0.01" value="${r.precio}" ${ro?'readonly':''} onchange="updateRecipeField('precio',Number(this.value))"></div>
-    <div class="rf-field"><label>Categoría</label><select ${ro?'disabled':''} onchange="updateRecipeField('cat',this.value)">${['Salsas','Proteinas','Condimentos','Otro'].map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
+    <div class="rf-field"><label>Categoría</label><select ${ro?'disabled':''} onchange="updateRecipeField('cat',this.value)">${getRecetaCats().map(c=>`<option${r.cat===c?' selected':''}>${c}</option>`).join('')}</select></div>`;
   refreshDetail();
   // Panel de presentaciones
   const pres=Object.values(r.presentaciones||{});
@@ -1790,6 +1795,41 @@ function renderInvProductos() {
 // ════════════════════════════════════════════════════════
 // ADMIN
 // ════════════════════════════════════════════════════════
+function renderAdminCats() {
+  const el=document.getElementById('admin-cats-panel'); if(!el) return;
+  const cats=getRecetaCats();
+  el.innerHTML=`
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      ${cats.map(c=>`
+        <div style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:5px 10px;">
+          <span style="font-size:12px">${escH(c)}</span>
+          <button class="icon-btn danger" onclick="deleteRecetaCat('${escH(c)}')" title="Eliminar">✕</button>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="new-cat-input" class="search-bar" placeholder="Nueva categoría…" style="width:220px;" onkeydown="if(event.key==='Enter')addRecetaCat()">
+      <button class="btn btn-primary btn-sm" onclick="addRecetaCat()">＋ Agregar</button>
+    </div>`;
+}
+window.addRecetaCat = async () => {
+  const input=document.getElementById('new-cat-input');
+  const cat=(input?.value||'').trim();
+  if(!cat){toast('Ingresa un nombre de categoría',true);return;}
+  const cats=getRecetaCats();
+  if(cats.map(c=>c.toLowerCase()).includes(cat.toLowerCase())){toast('Esa categoría ya existe',true);return;}
+  cats.push(cat);
+  await fbUpdate('config',{recetaCats:cats.join(',')});
+  DB.config['recetaCats']=cats.join(',');
+  if(input) input.value='';
+  renderAdminCats(); toast('✓ Categoría agregada');
+};
+window.deleteRecetaCat = async cat => {
+  if(!confirm(`¿Eliminar la categoría "${cat}"?`)) return;
+  const cats=getRecetaCats().filter(c=>c!==cat);
+  await fbUpdate('config',{recetaCats:cats.join(',')});
+  DB.config['recetaCats']=cats.join(',');
+  renderAdminCats(); toast('Categoría eliminada');
+};
 window.loadAdminUsers = async () => {
   if(CUR?.role!=='admin') return;
   const snap=await get(ref(db,'usuarios'));
@@ -2017,6 +2057,10 @@ window.submitVenta = async () => {
 window.openModal = id => {
   document.getElementById(id).classList.add('open');
   // Pre-populate selects when opening certain modals
+  if(id==='modal-new-recipe') {
+    const catSel=document.getElementById('nr-cat');
+    if(catSel) catSel.innerHTML=getRecetaCats().map(c=>`<option>${escH(c)}</option>`).join('');
+  }
   if(id==='modal-new-prod') {
     populateProdRecetaSelect();
     const fd=document.getElementById('prod-fecha'); if(fd) fd.value=new Date().toISOString().split('T')[0];

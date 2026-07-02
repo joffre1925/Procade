@@ -472,6 +472,7 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
       <div class="back-btn" onclick="switchTab('formulacion')">← Volver a Formulación</div>
       <div class="ph">
         <div><div class="pt" id="det-name">Receta</div><div class="ps" id="det-sub"></div></div>
+        <button class="btn btn-ghost btn-sm" id="btn-dup-recipe" onclick="duplicateCurrentRecipe()">⧉ Duplicar</button>
         <button class="btn btn-danger btn-sm" id="btn-delete-recipe" onclick="deleteCurrentRecipe()">🗑 Eliminar</button>
       </div>
       <div class="rf-grid" id="det-fields"></div>
@@ -1636,6 +1637,18 @@ window.deleteCurrentRecipe = async () => {
   await fbRemove(`recetas/${CUR_RECIPE_ID}`);
   delete DB.recetas[CUR_RECIPE_ID]; CUR_RECIPE_ID=null;
   renderSidebar('formulacion'); renderDashboard(); switchTab('formulacion'); toast('Receta eliminada');
+};
+window.duplicateCurrentRecipe = async () => {
+  if(!CUR_RECIPE_ID) return;
+  const r=DB.recetas[CUR_RECIPE_ID]; if(!r) return;
+  const newRef=await push(ref(db,'recetas'),{});
+  const newId=newRef.key;
+  const copy={...r, id:newId, name:r.name+' - Copia'};
+  await fbSet(`recetas/${newId}`, copy);
+  DB.recetas[newId]=copy;
+  CUR_RECIPE_ID=newId;
+  renderRecipeGrid(); renderSidebar('recipe-detail'); renderRecipeDetail();
+  toast('✓ Receta duplicada — renómbrala y ajusta lo necesario');
 };
 window.updateRecipePrecio = async (id,val) => {
   await fbUpdate(`recetas/${id}`,{precio:val});

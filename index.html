@@ -1210,7 +1210,7 @@ function populateHeader() {
 function applyWriteRestrictions() {
   if (canWrite()) return;
   // consulta: hide all action buttons
-  ['btn-new-recipe','btn-new-insumo','btn-new-prod','btn-new-compra','btn-new-venta','btn-delete-recipe','btn-add-ing'].forEach(id=>{
+  ['btn-new-recipe','btn-new-insumo','btn-new-prod','btn-new-compra','btn-new-venta','btn-delete-recipe','btn-dup-recipe','btn-add-ing'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
 }

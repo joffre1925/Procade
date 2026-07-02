@@ -859,6 +859,18 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
     <button class="btn btn-primary" onclick="addPresentacion()">Agregar Presentación</button>
   </div>
 </div></div>
+<div class="modal-overlay" id="modal-ing-history"><div class="modal" style="max-width:720px;width:95vw">
+  <div class="modal-title">📋 Historial de Compras — <span id="inh-title"></span></div>
+  <div id="inh-summary" style="display:flex;gap:20px;flex-wrap:wrap;padding:12px 0 4px;font-size:12px;color:var(--text-muted);border-bottom:1px solid var(--border);margin-bottom:12px;"></div>
+  <div style="overflow-x:auto">
+    <table style="width:100%">
+      <thead><tr><th>Fecha</th><th>Proveedor</th><th>Comprado (g)</th><th>Costo/g</th><th>Costo Master</th><th>Estado FIFO</th><th>Disponible (g)</th></tr></thead>
+      <tbody id="inh-table"></tbody>
+    </table>
+  </div>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-ing-history')">Cerrar</button></div>
+</div></div>
+
 <div id="toast"></div>
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -1600,7 +1612,7 @@ function renderInsumosTable() {
     const mq=i.name.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q)||(i.cat||'').toLowerCase().includes(q);
     return mq&&(!insumoFilter||i.cat===insumoFilter);
   });
-  const actBtns=canWrite()?code=>`<div style="display:flex;gap:4px;"><button class="icon-btn" onclick="openEditInsumo('${code}')" title="Editar">✏</button><button class="icon-btn danger" onclick="deleteInsumo('${code}')" title="Eliminar">✕</button></div>`:()=>'';
+  const actBtns=code=>`<div style="display:flex;gap:4px;"><button class="icon-btn" onclick="openIngHistory('${code}')" title="Historial de compras">📋</button>${canWrite()?`<button class="icon-btn" onclick="openEditInsumo('${code}')" title="Editar">✏</button><button class="icon-btn danger" onclick="deleteInsumo('${code}')" title="Eliminar">✕</button>`:''}</div>`;
   document.getElementById('insumos-table').innerHTML=ings.map(i=>{
     const cpg=insumoCPG(i), stock=getStockInsumo(i.code);
     return `<tr><td class="mono" style="color:var(--text-dim)">${i.code}</td><td>${escH(i.name)}</td><td>${catTag(i.cat)}</td><td class="muted">${i.prov||''}</td><td class="muted">${i.desc||''}</td><td class="accent mono">${fmt(i.cmaster)}</td><td class="mono">${i.um}</td><td class="accent mono">${fmtG(cpg)}</td><td>${stock>0?`<span class="inv-badge inv-ok">${stock.toFixed(0)}</span>`:'<span class="inv-badge inv-zero">0</span>'}</td><td>${actBtns(i.code)}</td></tr>`;
@@ -1655,6 +1667,72 @@ window.saveEditInsumo = async () => {
   DB.insumos[code] = data;
   closeModal('modal-edit-ing');
   renderInsumosTable(); refreshDetail(); toast('✓ Insumo actualizado');
+};
+
+window.openIngHistory = code => {
+  const ing = DB.insumos[code]; if(!ing) return;
+  document.getElementById('inh-title').textContent = `${code} — ${ing.name}`;
+
+  // Purchases sorted oldest → newest
+  const purs = Object.values(DB.compras)
+    .filter(c => c.ingCode === code && Number(c.um||0) > 0)
+    .sort((a,b) => ((a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:(a.id||'').localeCompare(b.id||'')));
+
+  // Total consumed by confirmed productions in chronological order
+  let consumed = 0;
+  Object.values(DB.produccion)
+    .filter(p => p.estado === 'completado')
+    .sort((a,b) => ((a.fechaConfirmacion||a.fecha||'')<(b.fechaConfirmacion||b.fecha||'')?-1:1))
+    .forEach(p => {
+      const rec = DB.recetas[p.recetaId]; if(!rec) return;
+      Object.values(rec.ingredients||{}).forEach(ri => {
+        if(ri.code === code) consumed += ri.qty * Number(p.actualLotes||p.lotes);
+      });
+    });
+
+  const totalComprado = purs.reduce((s,c)=>s+Number(c.um||0),0);
+  const stockDisp = Math.max(0, totalComprado - consumed);
+
+  document.getElementById('inh-summary').innerHTML = `
+    <span>📦 Total comprado: <strong>${totalComprado.toFixed(0)} g</strong></span>
+    <span>🏭 Total consumido: <strong>${consumed.toFixed(0)} g</strong></span>
+    <span>✅ Stock disponible: <strong>${stockDisp.toFixed(0)} g</strong></span>
+    <span>💰 Costo FIFO actual: <strong>${fmtG(getFifoCost(code, 1))} /g</strong></span>`;
+
+  // Walk FIFO to compute per-row status
+  let skip = consumed;
+  const rows = purs.map(pur => {
+    const purQty = Number(pur.um||0);
+    const cpg    = Number(pur.costPerG||0);
+    let estado, disponible;
+    if(skip >= purQty) {
+      estado = '<span style="color:var(--text-dim)">Consumido</span>';
+      disponible = 0; skip -= purQty;
+    } else {
+      const avail = purQty - skip;
+      if(skip > 0) {
+        estado = `<span style="color:var(--yellow)">Parcial (${skip.toFixed(0)}g usado)</span>`;
+      } else {
+        estado = '<span style="color:var(--green)">Disponible</span>';
+      }
+      disponible = avail; skip = 0;
+    }
+    return `<tr>
+      <td class="mono muted">${pur.date||'—'}</td>
+      <td class="muted">${escH(pur.prov||'—')}</td>
+      <td class="mono">${purQty.toFixed(0)}</td>
+      <td class="accent mono">${fmtG(cpg)}</td>
+      <td class="accent mono">${fmt(pur.cmaster||0)}</td>
+      <td>${estado}</td>
+      <td class="mono ${disponible>0?'':'muted'}">${disponible>0?disponible.toFixed(0):'—'}</td>
+    </tr>`;
+  });
+
+  document.getElementById('inh-table').innerHTML = rows.length
+    ? rows.join('')
+    : '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-dim)">Sin compras registradas para este insumo.</td></tr>';
+
+  openModal('modal-ing-history');
 };
 
 // ════════════════════════════════════════════════════════

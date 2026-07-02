@@ -922,11 +922,51 @@ const fmt   = n  => cur() + Number(n||0).toFixed(2);
 const fmtG  = n  => Number(n||0).toFixed(4);
 const insumoCPG = i => (!i||!i.um||i.um==0) ? 0 : i.cmaster/i.um;
 const getCPG    = code => { const i=DB.insumos[code]; return i ? insumoCPG(i) : 0; };
+
+// FIFO: returns weighted-average cost-per-gram for `qtyNeeded` grams of `code`,
+// consuming purchases oldest-first and skipping what confirmed productions already used.
+function getFifoCost(code, qtyNeeded) {
+  const purs = Object.values(DB.compras)
+    .filter(c => c.ingCode === code && Number(c.um || 0) > 0)
+    .sort((a, b) => ((a.date||'') < (b.date||'') ? -1 : (a.date||'') > (b.date||'') ? 1 : (a.id||'').localeCompare(b.id||'')));
+  if (!purs.length || !(qtyNeeded > 0)) return getCPG(code);
+
+  // How much of this ingredient has already been consumed by confirmed productions,
+  // ordered by confirmation date so FIFO order is preserved across batches.
+  let consumed = 0;
+  Object.values(DB.produccion)
+    .filter(p => p.estado === 'completado')
+    .sort((a, b) => ((a.fechaConfirmacion||a.fecha||'') < (b.fechaConfirmacion||b.fecha||'') ? -1 : 1))
+    .forEach(p => {
+      const rec = DB.recetas[p.recetaId]; if (!rec) return;
+      Object.values(rec.ingredients || {}).forEach(ri => {
+        if (ri.code === code) consumed += ri.qty * Number(p.actualLotes || p.lotes);
+      });
+    });
+
+  // Walk FIFO queue: skip `consumed` grams already used, then price `qtyNeeded`.
+  let skip = consumed, taken = 0, costTotal = 0;
+  for (const pur of purs) {
+    const purQty = Number(pur.um || 0);
+    const cpg    = Number(pur.costPerG || 0);
+    if (skip >= purQty) { skip -= purQty; continue; }
+    const available = purQty - skip; skip = 0;
+    const take = Math.min(available, qtyNeeded - taken);
+    costTotal += take * cpg; taken += take;
+    if (taken >= qtyNeeded) break;
+  }
+  // If stock runs out, extend with the most recent purchase price.
+  if (taken < qtyNeeded && purs.length) {
+    costTotal += (qtyNeeded - taken) * Number(purs[purs.length - 1].costPerG || 0);
+    taken = qtyNeeded;
+  }
+  return taken > 0 ? costTotal / taken : getCPG(code);
+}
 const escH  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function calcCosts(r) {
   let loteCost = 0;
-  Object.values(r.ingredients||{}).forEach(ri => { loteCost += getCPG(ri.code) * ri.qty; });
+  Object.values(r.ingredients||{}).forEach(ri => { loteCost += getFifoCost(ri.code, ri.qty) * ri.qty; });
   const orden = r.orden || 1;
   return { unit: loteCost / orden, total: loteCost };
 }
@@ -1636,7 +1676,7 @@ function renderProduccion() {
       <td><span class="tag ${p.tipo==='semiprocesado'?'tag-add':'tag-other'}">${p.tipo==='semiprocesado'?'Semiprocesado':'Normal'}</span></td>
       <td class="mono">${p.lotes}</td>
       <td class="mono ${p.actualLotes?'accent':'muted'}">${p.actualLotes||'—'}</td>
-      <td class="accent mono">${p.costUnit?fmt(p.costUnit):'—'}</td>
+      <td class="accent mono">${p.costFifoUnit?fmt(p.costFifoUnit)+(p.costUnit&&p.costUnit!==p.costFifoUnit?` <span class="muted" style="font-size:10px">(est. ${fmt(p.costUnit)})</span>`:''):p.costUnit?fmt(p.costUnit):'—'}</td>
       <td class="muted">${escH(p.operario||'—')}</td>
       <td>${p.estado==='completado'?'<span class="est-badge est-completado">✓ Confirmado</span>':estBadge(p.estado)}</td>
       <td style="display:flex;gap:4px;align-items:center;">${confirmBtn(p)} ${delBtn(p.id)}</td>
@@ -1669,18 +1709,35 @@ window.submitConfirmProd = async () => {
   const actualLotes=Number(document.getElementById('confirm-prod-lotes').value)||0;
   if(actualLotes<=0){toast('Ingresa la cantidad real producida',true);return;}
   const notas=document.getElementById('confirm-prod-notas').value;
-  await fbUpdate(`produccion/${CUR_CONFIRM_PROD_ID}`,{estado:'completado',actualLotes,notas:notas||p.notas||''});
-  DB.produccion[CUR_CONFIRM_PROD_ID]={...p,estado:'completado',actualLotes,notas:notas||p.notas||''};
-  // Si es semiprocesado: crear/actualizar insumo con el costo de producción
+  const fechaConfirmacion=new Date().toISOString();
+
+  // Calculate FIFO cost NOW — before marking as completado so this batch isn't
+  // counted as already consumed when getFifoCost walks confirmed productions.
+  const receta=DB.recetas[p.recetaId];
+  let costFifoLote=0;
+  if(receta) {
+    Object.values(receta.ingredients||{}).forEach(ri => {
+      const qtyTotal=ri.qty*actualLotes;
+      costFifoLote += getFifoCost(ri.code, qtyTotal) * qtyTotal;
+    });
+  }
+  const costFifoUnit = actualLotes>0 ? costFifoLote/actualLotes : 0;
+
+  await fbUpdate(`produccion/${CUR_CONFIRM_PROD_ID}`,{
+    estado:'completado', actualLotes, notas:notas||p.notas||'',
+    fechaConfirmacion, costFifoUnit, costFifoLote
+  });
+  DB.produccion[CUR_CONFIRM_PROD_ID]={...p,estado:'completado',actualLotes,
+    notas:notas||p.notas||'',fechaConfirmacion,costFifoUnit,costFifoLote};
+
+  // Si es semiprocesado: crear/actualizar insumo con el costo FIFO real
   if(p.tipo==='semiprocesado') {
-    const receta=DB.recetas[p.recetaId];
-    const costs=receta?calcCosts(receta):{unit:0};
     const semiCode='SEMI_'+p.recetaId;
     const semiIng=DB.insumos[semiCode];
     const prevUm=semiIng?Number(semiIng.um||0):0;
     const newUm=prevUm+actualLotes;
     const semiData={code:semiCode,name:p.recetaNombre,cat:'Semiprocesado',prov:'PROCADE',
-      cmaster:costs.unit*newUm,um:newUm,desc:'Lotes producidos',pais:'Peru'};
+      cmaster:costFifoUnit*newUm,um:newUm,desc:'Lotes producidos',pais:'Peru'};
     await fbSet(`insumos/${semiCode}`,semiData);
     DB.insumos[semiCode]=semiData;
   }

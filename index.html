@@ -1451,7 +1451,8 @@ function renderRecipeDetail() {
   // Panel de presentaciones
   const pres=Object.values(r.presentaciones||{});
   const bc=calcCosts(r);
-  const presRows=pres.map(p=>{
+  const totalPeso=Object.values(r.ingredients||{}).reduce((s,ri)=>s+Number(ri.qty||0),0);
+  const presRow = p => {
     const factor=(r.envase&&p.envase)?p.envase/r.envase:1;
     const cu=bc.unit*factor;
     return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface2);">
@@ -1461,7 +1462,8 @@ function renderRecipeDetail() {
       ${p.precio>0?`<div class="mono" style="font-size:11px;color:var(--green)">${fmt(p.precio)} venta</div>`:''}
       ${ro?'':`<button class="icon-btn danger" onclick="deletePresentacion('${p.id}')">✕</button>`}
     </div>`;
-  }).join('');
+  };
+  const presRows=pres.map(presRow).join('');
   const presPanelEl=document.getElementById('det-pres-panel');
   if(presPanelEl) presPanelEl.innerHTML=`<div class="panel">
     <div class="panel-hdr">
@@ -1469,8 +1471,14 @@ function renderRecipeDetail() {
       ${ro?'':`<button class="btn btn-ghost btn-sm" onclick="openModal('modal-add-presentacion')">＋ Agregar Presentación</button>`}
     </div>
     <div style="padding:0 16px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface2);background:rgba(212,168,75,.04);margin:0 -16px;padding:9px 16px;">
+        <div style="flex:1"><strong>Reproceso</strong> <span style="color:var(--text-dim);font-size:11px;font-family:'DM Mono',monospace">${totalPeso.toFixed(0)}g total lote</span> <span style="font-size:10px;background:rgba(212,168,75,.15);color:var(--yellow);border-radius:4px;padding:1px 5px;margin-left:4px">default</span></div>
+        <div class="mono accent" style="font-size:12px">${fmt(bc.total)} lote</div>
+        <div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">×${(r.orden||1).toFixed(0)} un</div>
+        ${ro?'':`<div style="width:22px"></div>`}
+      </div>
       <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--surface2);">
-        <div style="flex:1"><strong>Base</strong> <span style="color:var(--text-dim);font-size:11px;font-family:'DM Mono',monospace">${r.envase}g/ml</span></div>
+        <div style="flex:1"><strong>Base</strong> <span style="color:var(--text-dim);font-size:11px;font-family:'DM Mono',monospace">${r.envase}g/ml por unidad</span></div>
         <div class="mono accent" style="font-size:12px">${fmt(bc.unit)}/un</div>
         <div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">×1.000</div>
         ${r.precio>0?`<div class="mono" style="font-size:11px;color:var(--green)">${fmt(r.precio)} venta</div>`:''}

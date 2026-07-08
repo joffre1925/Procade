@@ -1527,7 +1527,7 @@ function renderRecipeDetail() {
       </div>
       <div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">×${factor.toFixed(3)}</div>
       ${p.precio>0?`<div class="mono" style="font-size:11px;color:var(--green)">${fmt(p.precio)} venta</div>`:''}
-      ${ro?'':`<button class="icon-btn danger" onclick="deletePresentacion('${p.id}')">✕</button>`}
+      <button class="icon-btn danger" onclick="deletePresentacion('${p.id}')" title="Eliminar presentación">🗑</button>
     </div>`;
   };
   const presRows=pres.map(presRow).join('');

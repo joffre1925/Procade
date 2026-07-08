@@ -479,6 +479,11 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <button class="btn btn-danger btn-sm" id="btn-delete-recipe" onclick="deleteCurrentRecipe()">🗑 Eliminar</button>
       </div>
       <div class="rf-grid" id="det-fields"></div>
+      <div id="det-pres-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;">
+        <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">Presentación:</span>
+        <select id="det-active-pres" onchange="onDetailPresChange()" style="flex:1;background:transparent;border:none;color:var(--text);font-size:12px;outline:none;cursor:pointer;"></select>
+        <span id="det-pres-tipo-tag" style="font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap"></span>
+      </div>
       <div class="cost-box" style="grid-template-columns:repeat(4,1fr);">
         <div><div class="cb-lbl">Costo MP / Unidad</div><div class="cb-val accent" id="cb-unit">—</div></div>
         <div><div class="cb-lbl">Inversión Total Lote</div><div class="cb-val" id="cb-total">—</div></div>
@@ -860,6 +865,12 @@ td.green{color:var(--green);}td.red{color:var(--red);}td.muted{color:var(--text-
         <option value="">Sin insumo de envase</option>
       </select>
     </div>
+    <div class="ff full"><label>Tipo <span style="color:var(--red)">*</span></label>
+      <select id="pres-tipo" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 11px;font-size:12px;outline:none;width:100%;">
+        <option value="terminado">Producto Terminado → Inventario</option>
+        <option value="semiprocesado">Semiprocesado → Insumos</option>
+      </select>
+    </div>
     <div class="ff"><label>Precio de Venta</label><input id="pres-precio" type="number" step="0.01" value="0"></div>
     <div class="ff full" id="pres-preview" style="display:none;background:rgba(212,168,75,.07);border:1px solid rgba(212,168,75,.2);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text-muted);"></div>
   </div>
@@ -928,6 +939,7 @@ function roleBadge(role) {
 let DB = { insumos:{}, recetas:{}, produccion:{}, compras:{}, ventas:{}, usuarios:{}, config:{} };
 let CUR = null;
 let CUR_RECIPE_ID = null;
+let CUR_PRES_ID   = null;
 let CUR_CONFIRM_PROD_ID = null;
 let AI_CODE = null, PUR_CODE = null;
 let RT_LISTENERS = [];
@@ -1442,7 +1454,7 @@ function renderPricing() {
 
 // ── Recipe Detail ──
 window.openRecipe = id => {
-  CUR_RECIPE_ID=id;
+  CUR_RECIPE_ID=id; CUR_PRES_ID=null;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-recipe-detail').classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -1451,10 +1463,42 @@ window.openRecipe = id => {
   renderRecipeDetail();
 };
 
+window.onDetailPresChange = () => {
+  CUR_PRES_ID = document.getElementById('det-active-pres')?.value || null;
+  const r=getR(); if(!r) return;
+  const bc=calcCosts(r);
+  const pres=CUR_PRES_ID?r.presentaciones?.[CUR_PRES_ID]:null;
+  const factor=(pres&&r.envase&&pres.envase)?pres.envase/r.envase:1;
+  const envaseCost=pres?.envaseCode?getFifoCost(pres.envaseCode,1):0;
+  const cuSel=bc.unit*factor+envaseCost;
+  const totalSel=cuSel*(r.orden||1);
+  const precioRef=pres?.precio||r.precio||0;
+  const mg=precioRef>0?((precioRef-cuSel)/precioRef*100).toFixed(1)+'%':'—';
+  document.getElementById('cb-unit').textContent=fmt(cuSel);
+  document.getElementById('cb-total').textContent=fmt(totalSel);
+  const cm=document.getElementById('cb-margin'); cm.textContent=mg;
+  cm.className='cb-val '+(precioRef>cuSel?'green':(precioRef===0?'':'red'));
+  const tag=document.getElementById('det-pres-tipo-tag');
+  if(tag){
+    const tipo=pres?.tipo||'terminado';
+    tag.textContent=tipo==='semiprocesado'?'Semiprocesado → Insumos':'Terminado → Inventario';
+    tag.style.background=tipo==='semiprocesado'?'rgba(106,177,135,.15)':'rgba(212,168,75,.15)';
+    tag.style.color=tipo==='semiprocesado'?'var(--green)':'var(--yellow)';
+  }
+};
+
 function renderRecipeDetail() {
   const r=getR(); if(!r) return;
   document.getElementById('det-name').textContent=r.name;
   document.getElementById('det-sub').textContent=r.cat+' · '+Object.keys(r.ingredients||{}).length+' insumos';
+  // Populate presentation selector
+  const presArr=Object.values(r.presentaciones||{});
+  const sel=document.getElementById('det-active-pres');
+  if(sel){
+    sel.innerHTML=`<option value="">Base — ${r.envase}g/ml (Terminado)</option>`+
+      presArr.map(p=>`<option value="${p.id}"${CUR_PRES_ID===p.id?' selected':''}>${escH(p.nombre)} — ${p.tipo==='semiprocesado'?'Semiprocesado':'Terminado'}</option>`).join('');
+  }
+  onDetailPresChange();
   const ro=!canWrite();
   document.getElementById('det-fields').innerHTML=`
     <div class="rf-field"><label>Nombre</label><input value="${escH(r.name)}" ${ro?'readonly':''} onchange="updateRecipeField('name',this.value)"></div>
@@ -1595,9 +1639,10 @@ window.addPresentacion = async () => {
   const precio=Number(document.getElementById('pres-precio').value)||0;
   const envaseCode=(document.getElementById('pres-envase-code')||{}).value||'';
   const envaseName=envaseCode&&DB.insumos[envaseCode]?DB.insumos[envaseCode].name:'';
+  const tipo=(document.getElementById('pres-tipo')||{}).value||'terminado';
   if(!nombre||envase<=0){toast('Ingresa nombre y tamaño',true);return;}
   const pid='P_'+Date.now();
-  const pdata={id:pid,nombre,envase,precio,envaseCode,envaseName};
+  const pdata={id:pid,nombre,envase,precio,envaseCode,envaseName,tipo};
   await fbSet(`recetas/${CUR_RECIPE_ID}/presentaciones/${pid}`,pdata);
   if(!DB.recetas[CUR_RECIPE_ID].presentaciones) DB.recetas[CUR_RECIPE_ID].presentaciones={};
   DB.recetas[CUR_RECIPE_ID].presentaciones[pid]=pdata;
@@ -1878,8 +1923,12 @@ window.submitConfirmProd = async () => {
   DB.produccion[CUR_CONFIRM_PROD_ID]={...p,estado:'completado',actualLotes,
     notas:notas||p.notas||'',fechaConfirmacion,costFifoUnit,costFifoLote};
 
+  // Determinar tipo desde la presentación seleccionada (si existe), sino desde el campo de producción
+  const presParaTipo=receta?.presentaciones?.[p.presId||''];
+  const tipoFinal=presParaTipo?.tipo||p.tipo||'normal';
+
   // Si es semiprocesado: crear/actualizar insumo con el costo FIFO real
-  if(p.tipo==='semiprocesado') {
+  if(tipoFinal==='semiprocesado') {
     const semiCode='SEMI_'+p.recetaId;
     const semiIng=DB.insumos[semiCode];
     const prevUm=semiIng?Number(semiIng.um||0):0;
@@ -2213,11 +2262,12 @@ window.submitProduccion = async () => {
   const presEnvase=pres?pres.envase:(receta?.envase||0);
   const presEnvaseCode=pres?.envaseCode||'';
   const presEnvaseName=pres?.envaseName||'';
+  const tipoFinal=pres?.tipo||tipo;
   const bc=receta?calcCosts(receta):{unit:0};
   const factor=(receta?.envase&&presEnvase)?presEnvase/receta.envase:1;
   const envaseCostUnit=presEnvaseCode?getFifoCost(presEnvaseCode,1):0;
   const costUnit=bc.unit*factor+envaseCostUnit;
-  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,tipo,estado:'pendiente',actualLotes:null,presNombre,presEnvase,presEnvaseCode,presEnvaseName,costUnit,notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
+  const entry={id:'',recetaId,recetaNombre:receta?receta.name:recetaId,lotes:Number(document.getElementById('prod-lotes').value)||1,fecha:document.getElementById('prod-fecha').value||new Date().toISOString().split('T')[0],operario:document.getElementById('prod-operario').value,tipo:tipoFinal,presId:presId||'',estado:'pendiente',actualLotes:null,presNombre,presEnvase,presEnvaseCode,presEnvaseName,costUnit,notas:document.getElementById('prod-notas').value,savedBy:CUR?.name||''};
   const newRef=await push(ref(db,'produccion'),entry);
   entry.id=newRef.key; DB.produccion[newRef.key]=entry;
   closeModal('modal-new-prod');
